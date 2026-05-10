@@ -2,7 +2,7 @@ name: Build APK
 
 on:
   push:
-    branches:[ "**" ]
+    branches: [ "**" ]
   pull_request:
     branches: [ "**" ]
 
@@ -33,7 +33,7 @@ jobs:
           
           echo "2. Fixing Room Database Schema path..."
           mkdir -p app/schemas/com.huayin.music.db.InternalDatabase
-          if[ -d "app/schemas/com.arturo254.opentune.db.InternalDatabase" ]; then
+          if [ -d "app/schemas/com.arturo254.opentune.db.InternalDatabase" ]; then
             cp -r app/schemas/com.arturo254.opentune.db.InternalDatabase/* app/schemas/com.huayin.music.db.InternalDatabase/ 2>/dev/null || true
           fi
 

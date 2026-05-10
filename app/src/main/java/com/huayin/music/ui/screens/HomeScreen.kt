@@ -1,10 +1,13 @@
 package com.huayin.music.ui.screens
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -14,8 +17,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,24 +32,22 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
+import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
-import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
-import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -54,14 +57,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -73,13 +75,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
-import com.huayin.music.innertube.models.AlbumItem
-import com.huayin.music.innertube.models.ArtistItem
-import com.huayin.music.innertube.models.PlaylistItem
-import com.huayin.music.innertube.models.SongItem
-import com.huayin.music.innertube.models.WatchEndpoint
-import com.huayin.music.innertube.models.YTItem
-import com.huayin.music.innertube.utils.parseCookieString
 import com.huayin.music.LocalDatabase
 import com.huayin.music.LocalPlayerAwareWindowInsets
 import com.huayin.music.LocalPlayerConnection
@@ -87,13 +82,19 @@ import com.huayin.music.R
 import com.huayin.music.constants.AccountNameKey
 import com.huayin.music.constants.InnerTubeCookieKey
 import com.huayin.music.constants.ListThumbnailSize
-import com.huayin.music.constants.ThumbnailCornerRadius
 import com.huayin.music.db.entities.Album
 import com.huayin.music.db.entities.Artist
 import com.huayin.music.db.entities.LocalItem
 import com.huayin.music.db.entities.Playlist
 import com.huayin.music.db.entities.Song
 import com.huayin.music.extensions.togglePlayPause
+import com.huayin.music.innertube.models.AlbumItem
+import com.huayin.music.innertube.models.ArtistItem
+import com.huayin.music.innertube.models.PlaylistItem
+import com.huayin.music.innertube.models.SongItem
+import com.huayin.music.innertube.models.WatchEndpoint
+import com.huayin.music.innertube.models.YTItem
+import com.huayin.music.innertube.utils.parseCookieString
 import com.huayin.music.models.toMediaMetadata
 import com.huayin.music.playback.queues.LocalAlbumRadio
 import com.huayin.music.playback.queues.YouTubeAlbumRadio
@@ -102,8 +103,6 @@ import com.huayin.music.ui.component.ChipsRow
 import com.huayin.music.ui.component.HideOnScrollFAB
 import com.huayin.music.ui.component.LocalMenuState
 import com.huayin.music.ui.component.NavigationTitle
-import com.huayin.music.ui.component.SongGridItem
-import com.huayin.music.ui.component.YouTubeGridItem
 import com.huayin.music.ui.component.shimmer.GridItemPlaceHolder
 import com.huayin.music.ui.component.shimmer.ShimmerHost
 import com.huayin.music.ui.component.shimmer.TextPlaceholder
@@ -114,7 +113,6 @@ import com.huayin.music.ui.menu.YouTubeAlbumMenu
 import com.huayin.music.ui.menu.YouTubeArtistMenu
 import com.huayin.music.ui.menu.YouTubePlaylistMenu
 import com.huayin.music.ui.menu.YouTubeSongMenu
-import com.huayin.music.ui.utils.SnapLayoutInfoProvider
 import com.huayin.music.utils.rememberPreference
 import com.huayin.music.viewmodels.HomeViewModel
 import kotlinx.coroutines.Dispatchers
@@ -152,7 +150,7 @@ private fun CompactLocalItem(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
-            androidx.compose.animation.AnimatedVisibility(visible = isActive) {
+            AnimatedVisibility(visible = isActive) {
                 Box(
                     modifier = Modifier.fillMaxSize().background(Color.Black.copy(0.4f)),
                     contentAlignment = Alignment.Center
@@ -202,7 +200,7 @@ private fun CompactYTGridItem(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
-            androidx.compose.animation.AnimatedVisibility(visible = isActive) {
+            AnimatedVisibility(visible = isActive) {
                 Box(
                     modifier = Modifier.fillMaxSize().background(Color.Black.copy(0.4f)),
                     contentAlignment = Alignment.Center
@@ -323,39 +321,38 @@ fun HomeScreen(
             }
 
             // High impact Material3 Carousel serving rich big visual representation to draw emphasis quickly
-            quickPicks?.takeIf { it.isNotEmpty() }?.let { quickPicks ->
+            quickPicks?.takeIf { it.isNotEmpty() }?.let { quickPicksList ->
                 item {
                     NavigationTitle(
-                        title = "即选发现灵感库 (发现选点)",
+                        title = "即选发现灵感库",
+                        label = "每日优选推荐",
                         modifier = Modifier.animateItem()
                     )
                 }
 
                 item {
-                    val carouselState = rememberCarouselState { quickPicks.size }
+                    val carouselState = rememberCarouselState { quickPicksList.size }
                     HorizontalMultiBrowseCarousel(
                         state = carouselState,
-                        preferredItemWidth = 140.dp,
-                        itemSpacing = 8.dp,
-                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        preferredItemWidth = 320.dp,
+                        itemSpacing = 12.dp,
+                        contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal)
+                                .add(WindowInsets(left = 16.dp, right = 16.dp)).asPaddingValues(),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(180.dp)
+                            .height(400.dp) // Massive edge-to-edge feel
                             .animateItem()
                     ) { index ->
-                        val originalSong = quickPicks[index]
+                        val originalSong = quickPicksList[index]
                         val song by database.song(originalSong.id).collectAsState(initial = originalSong)
+                        val isActive = song!!.id == mediaMetadata?.id
 
-                        SongGridItem(
-                            song = song!!,
-                            fillMaxWidth = true, // fill entire allocated space natively supported implicitly under Scope!
-                            isActive = song!!.id == mediaMetadata?.id,
-                            isPlaying = isPlaying,
+                        Card(
                             modifier = Modifier
-                                .fillMaxWidth()
+                                .fillMaxSize()
                                 .combinedClickable(
                                     onClick = {
-                                        if (song!!.id == mediaMetadata?.id) playerConnection.player.togglePlayPause()
+                                        if (isActive) playerConnection.player.togglePlayPause()
                                         else playerConnection.playQueue(YouTubeQueue.radio(song!!.toMediaMetadata()))
                                     },
                                     onLongClick = {
@@ -368,8 +365,82 @@ fun HomeScreen(
                                             )
                                         }
                                     }
+                                ),
+                            shape = RoundedCornerShape(32.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                        ) {
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                // Full Cover Background
+                                AsyncImage(
+                                    model = song!!.song.thumbnailUrl,
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
                                 )
-                        )
+
+                                // Gradient Scrim for readable text
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .fillMaxHeight(0.6f)
+                                        .align(Alignment.BottomCenter)
+                                        .background(
+                                            Brush.verticalGradient(
+                                                colors = listOf(
+                                                    Color.Transparent,
+                                                    Color.Black.copy(alpha = 0.8f),
+                                                    Color.Black.copy(alpha = 0.95f)
+                                                )
+                                            )
+                                        )
+                                )
+
+                                // Active/Playing Overlay
+                                AnimatedVisibility(
+                                    visible = isActive,
+                                    modifier = Modifier.matchParentSize(),
+                                    enter = fadeIn(), exit = fadeOut()
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .background(Color.Black.copy(alpha = 0.4f)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            painterResource(if (isPlaying) R.drawable.pause else R.drawable.play),
+                                            contentDescription = null,
+                                            tint = Color.White,
+                                            modifier = Modifier.size(64.dp)
+                                        )
+                                    }
+                                }
+
+                                // Overlaid Content Details
+                                Column(
+                                    modifier = Modifier
+                                        .align(Alignment.BottomStart)
+                                        .fillMaxWidth()
+                                        .padding(start = 24.dp, end = 24.dp, bottom = 32.dp)
+                                ) {
+                                    Text(
+                                        text = song!!.song.title,
+                                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black),
+                                        color = Color.White,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        text = song!!.artists.joinToString { it.name },
+                                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
+                                        color = Color.White.copy(alpha = 0.85f),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }

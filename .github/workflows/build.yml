@@ -32,8 +32,6 @@ jobs:
           find . -type f \( -name "*.kts" \) -exec sed -i 's/com\.Arturo254\.opentune/com.huayin.music/g' {} +
           
           echo "2. Fixing Room Database Schema path..."
-          # KSP requires the schema folder to perfectly match the fully qualified name of the Database class.
-          # If it doesn't match, AutoMigrations will crash the compiler with 'MissingType'.
           mkdir -p app/schemas/com.huayin.music.db.InternalDatabase
           if[ -d "app/schemas/com.arturo254.opentune.db.InternalDatabase" ]; then
             cp -r app/schemas/com.arturo254.opentune.db.InternalDatabase/* app/schemas/com.huayin.music.db.InternalDatabase/ 2>/dev/null || true
@@ -43,7 +41,6 @@ jobs:
         run: chmod +x gradlew
 
       - name: Clean and Build Debug APK
-        # Run 'clean' to wipe the corrupted KSP cache from the previous failed run
         run: |
           ./gradlew clean
           ./gradlew assembleDebug --no-daemon --stacktrace

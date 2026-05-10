@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -137,12 +139,12 @@ private fun CompactLocalItem(
     Column(
         verticalArrangement = Arrangement.Top,
         modifier = Modifier
-            .width(96.dp)
+            .width(88.dp)
             .combinedClickable(onClick = onNavigate, onLongClick = onMenuShow)
     ) {
         Box(
             modifier = Modifier
-                .height(96.dp)
+                .height(88.dp)
                 .fillMaxWidth()
                 .clip(if (item is Artist) CircleShape else RoundedCornerShape(8.dp)),
             contentAlignment = Alignment.Center
@@ -193,7 +195,7 @@ private fun CompactYTGridItem(
 
     Column(
         modifier = Modifier
-            .width(96.dp)
+            .width(88.dp)
             .combinedClickable(onClick = onNavigate, onLongClick = onMenuShow)
     ) {
         Box(
@@ -342,12 +344,12 @@ fun HomeScreen(
                     val carouselState = rememberCarouselState { quickPicksList.size }
                     HorizontalMultiBrowseCarousel(
                         state = carouselState,
-                        preferredItemWidth = 320.dp,
-                        itemSpacing = 12.dp,
+                        preferredItemWidth = 160.dp,
+                        itemSpacing = 8.dp,
                         contentPadding = PaddingValues(horizontal = 16.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(400.dp) // Massive edge-to-edge feel
+                            .height(200.dp)
                             .animateItem()
                     ) { index ->
                         val originalSong = quickPicksList[index]
@@ -356,6 +358,7 @@ fun HomeScreen(
 
                         Card(
                             modifier = Modifier
+                                .maskClip(RoundedCornerShape(24.dp))
                                 .fillMaxSize()
                                 .combinedClickable(
                                     onClick = {
@@ -373,7 +376,7 @@ fun HomeScreen(
                                         }
                                     }
                                 ),
-                            shape = RoundedCornerShape(32.dp),
+                            shape = RoundedCornerShape(24.dp), // Safe fallback shape
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                         ) {
                             Box(modifier = Modifier.fillMaxSize()) {
@@ -389,14 +392,14 @@ fun HomeScreen(
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .fillMaxHeight(0.6f)
+                                        .fillMaxHeight(0.7f)
                                         .align(Alignment.BottomCenter)
                                         .background(
                                             Brush.verticalGradient(
                                                 colors = listOf(
                                                     Color.Transparent,
-                                                    Color.Black.copy(alpha = 0.8f),
-                                                    Color.Black.copy(alpha = 0.95f)
+                                                    Color.Black.copy(alpha = 0.6f),
+                                                    Color.Black.copy(alpha = 0.9f)
                                                 )
                                             )
                                         )
@@ -419,7 +422,7 @@ fun HomeScreen(
                                             painterResource(if (isPlaying) R.drawable.pause else R.drawable.play),
                                             contentDescription = null,
                                             tint = Color.White.copy(alpha = overlayAlpha),
-                                            modifier = Modifier.size(64.dp)
+                                            modifier = Modifier.size(48.dp)
                                         )
                                     }
                                 }
@@ -429,19 +432,19 @@ fun HomeScreen(
                                     modifier = Modifier
                                         .align(Alignment.BottomStart)
                                         .fillMaxWidth()
-                                        .padding(start = 24.dp, end = 24.dp, bottom = 32.dp)
+                                        .padding(12.dp)
                                 ) {
                                     Text(
                                         text = song!!.song.title,
-                                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black),
+                                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black),
                                         color = Color.White,
                                         maxLines = 2,
                                         overflow = TextOverflow.Ellipsis
                                     )
-                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Spacer(modifier = Modifier.height(4.dp))
                                     Text(
                                         text = song!!.artists.joinToString { it.name },
-                                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
+                                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
                                         color = Color.White.copy(alpha = 0.85f),
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
@@ -506,7 +509,7 @@ fun HomeScreen(
                             if (url != null) {
                                 AsyncImage(
                                     model = ImageRequest.Builder(LocalContext.current)
-                                        .data(url).build(),
+                                        .data(url).crossfade(true).build(),
                                     placeholder = painterResource(id = R.drawable.person),
                                     error = painterResource(id = R.drawable.person),
                                     contentDescription = null,
@@ -691,7 +694,7 @@ fun HomeScreen(
                                 .width(250.dp),
                         )
                         LazyRow(contentPadding = PaddingValues(horizontal = 16.dp)) {
-                            items(4) { GridItemPlaceHolder(modifier=Modifier.width(96.dp), fillMaxWidth=true) }
+                            items(4) { GridItemPlaceHolder(modifier=Modifier.width(88.dp), fillMaxWidth=true) }
                         }
                     }
                 }

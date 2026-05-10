@@ -2,6 +2,7 @@ package com.huayin.music.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.background
@@ -60,6 +61,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -201,7 +203,7 @@ fun WelcomeScreen(navController: NavController) {
                                 contentAlignment = Alignment.Center
                             ){
                                 Icon(
-                                    painter = painterResource(if (proxyEnabled) R.drawable.wifi_proxy else R.drawable.wifi),
+                                    painter = painterResource(if (proxyEnabled) R.drawable.wifi_proxy else R.drawable.language),
                                     contentDescription = "Proxy",
                                     tint = MaterialTheme.colorScheme.onTertiaryContainer
                                 )

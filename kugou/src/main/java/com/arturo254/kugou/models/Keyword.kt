@@ -1,3 +1,3 @@
-package com.arturo254.kugou.models
+package com.huayin.music.kugou.models
 
 data class Keyword(val title: String, val artist: String)

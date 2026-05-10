@@ -1,10 +1,10 @@
-package com.arturo254.innertube.pages
+package com.huayin.music.innertube.pages
 
-import com.arturo254.innertube.models.AlbumItem
-import com.arturo254.innertube.models.Artist
-import com.arturo254.innertube.models.MusicTwoRowItemRenderer
-import com.arturo254.innertube.models.oddElements
-import com.arturo254.innertube.models.splitBySeparator
+import com.huayin.music.innertube.models.AlbumItem
+import com.huayin.music.innertube.models.Artist
+import com.huayin.music.innertube.models.MusicTwoRowItemRenderer
+import com.huayin.music.innertube.models.oddElements
+import com.huayin.music.innertube.models.splitBySeparator
 
 object NewReleaseAlbumPage {
     fun fromMusicTwoRowItemRenderer(renderer: MusicTwoRowItemRenderer): AlbumItem? {

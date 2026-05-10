@@ -1,7 +1,7 @@
-package com.arturo254.innertube.models.body
+package com.huayin.music.innertube.models.body
 
-import com.arturo254.innertube.models.Context
-import com.arturo254.innertube.models.Continuation
+import com.huayin.music.innertube.models.Context
+import com.huayin.music.innertube.models.Continuation
 import kotlinx.serialization.Serializable
 
 @Serializable

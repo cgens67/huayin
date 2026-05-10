@@ -12,7 +12,7 @@ import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.offline.Download
 import androidx.media3.exoplayer.offline.DownloadManager
 import androidx.media3.exoplayer.offline.DownloadNotificationHelper
-import com.arturo254.innertube.YouTube
+import com.huayin.music.innertube.YouTube
 import com.huayin.music.constants.AudioQuality
 import com.huayin.music.constants.AudioQualityKey
 import com.huayin.music.db.MusicDatabase

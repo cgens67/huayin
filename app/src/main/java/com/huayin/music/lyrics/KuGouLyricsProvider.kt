@@ -1,7 +1,7 @@
 package com.huayin.music.lyrics
 
 import android.content.Context
-import com.arturo254.kugou.KuGou
+import com.huayin.music.kugou.KuGou
 import com.huayin.music.constants.EnableKugouKey
 import com.huayin.music.utils.dataStore
 import com.huayin.music.utils.get

@@ -1,4 +1,4 @@
-package com.arturo254.innertube.models
+package com.huayin.music.innertube.models
 
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable

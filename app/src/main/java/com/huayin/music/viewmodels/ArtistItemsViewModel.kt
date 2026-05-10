@@ -4,9 +4,9 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arturo254.innertube.YouTube
-import com.arturo254.innertube.models.BrowseEndpoint
-import com.arturo254.innertube.models.filterExplicit
+import com.huayin.music.innertube.YouTube
+import com.huayin.music.innertube.models.BrowseEndpoint
+import com.huayin.music.innertube.models.filterExplicit
 import com.huayin.music.constants.HideExplicitKey
 import com.huayin.music.models.ItemsPage
 import com.huayin.music.utils.dataStore

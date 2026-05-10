@@ -1,7 +1,7 @@
 package com.huayin.music.lyrics
 
 import android.content.Context
-import com.arturo254.lrclib.LrcLib
+import com.huayin.music.lrclib.LrcLib
 import com.huayin.music.constants.EnableLrcLibKey
 import com.huayin.music.utils.dataStore
 import com.huayin.music.utils.get

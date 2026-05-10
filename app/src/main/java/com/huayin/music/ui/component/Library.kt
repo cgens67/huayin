@@ -11,8 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavController
-import com.arturo254.innertube.models.PlaylistItem
-import com.arturo254.innertube.models.WatchEndpoint
+import com.huayin.music.innertube.models.PlaylistItem
+import com.huayin.music.innertube.models.WatchEndpoint
 import com.huayin.music.R
 import com.huayin.music.db.entities.Album
 import com.huayin.music.db.entities.Artist

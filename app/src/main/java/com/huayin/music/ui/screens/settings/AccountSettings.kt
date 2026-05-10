@@ -28,8 +28,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.arturo254.innertube.YouTube
-import com.arturo254.innertube.utils.parseCookieString
+import com.huayin.music.innertube.YouTube
+import com.huayin.music.innertube.utils.parseCookieString
 import com.huayin.music.App.Companion.forgetAccount
 import com.huayin.music.LocalPlayerAwareWindowInsets
 import com.huayin.music.R

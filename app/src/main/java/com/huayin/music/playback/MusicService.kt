@@ -58,10 +58,10 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaSession
 import androidx.media3.session.SessionToken
-import com.arturo254.innertube.YouTube
-import com.arturo254.innertube.models.SongItem
-import com.arturo254.innertube.models.WatchEndpoint
-import com.arturo254.jossredconnect.JossRedClient
+import com.huayin.music.innertube.YouTube
+import com.huayin.music.innertube.models.SongItem
+import com.huayin.music.innertube.models.WatchEndpoint
+import com.huayin.music.jossredconnect.JossRedClient
 import com.huayin.music.MainActivity
 import com.huayin.music.R
 import com.huayin.music.constants.AudioNormalizationKey

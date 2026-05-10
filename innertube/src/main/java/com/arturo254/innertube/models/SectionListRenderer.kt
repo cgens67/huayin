@@ -1,6 +1,6 @@
-package com.arturo254.innertube.models
+package com.huayin.music.innertube.models
 
-import com.arturo254.innertube.models.response.BrowseResponse
+import com.huayin.music.innertube.models.response.BrowseResponse
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonNames

@@ -6,8 +6,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arturo254.innertube.YouTube
-import com.arturo254.innertube.pages.ArtistPage
+import com.huayin.music.innertube.YouTube
+import com.huayin.music.innertube.pages.ArtistPage
 import com.huayin.music.db.MusicDatabase
 import com.huayin.music.utils.reportException
 import dagger.hilt.android.lifecycle.HiltViewModel

@@ -1,8 +1,8 @@
-package com.arturo254.innertube.models.response
+package com.huayin.music.innertube.models.response
 
-import com.arturo254.innertube.models.NavigationEndpoint
-import com.arturo254.innertube.models.PlaylistPanelRenderer
-import com.arturo254.innertube.models.Tabs
+import com.huayin.music.innertube.models.NavigationEndpoint
+import com.huayin.music.innertube.models.PlaylistPanelRenderer
+import com.huayin.music.innertube.models.Tabs
 import kotlinx.serialization.Serializable
 
 @Serializable

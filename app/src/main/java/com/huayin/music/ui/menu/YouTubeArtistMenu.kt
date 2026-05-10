@@ -23,7 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.arturo254.innertube.models.ArtistItem
+import com.huayin.music.innertube.models.ArtistItem
 import com.huayin.music.LocalDatabase
 import com.huayin.music.LocalPlayerConnection
 import com.huayin.music.R

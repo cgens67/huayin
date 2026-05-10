@@ -1,12 +1,12 @@
-package com.arturo254.innertube.utils
+package com.huayin.music.innertube.utils
 
-import com.arturo254.innertube.YouTube
-import com.arturo254.innertube.models.AlbumItem
-import com.arturo254.innertube.models.ArtistItem
-import com.arturo254.innertube.models.PlaylistItem
-import com.arturo254.innertube.pages.LibraryContinuationPage
-import com.arturo254.innertube.pages.LibraryPage
-import com.arturo254.innertube.pages.PlaylistPage
+import com.huayin.music.innertube.YouTube
+import com.huayin.music.innertube.models.AlbumItem
+import com.huayin.music.innertube.models.ArtistItem
+import com.huayin.music.innertube.models.PlaylistItem
+import com.huayin.music.innertube.pages.LibraryContinuationPage
+import com.huayin.music.innertube.pages.LibraryPage
+import com.huayin.music.innertube.pages.PlaylistPage
 import io.ktor.http.URLBuilder
 import io.ktor.http.parseQueryString
 import java.security.MessageDigest

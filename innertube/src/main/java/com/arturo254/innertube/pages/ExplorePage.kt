@@ -1,6 +1,6 @@
-package com.arturo254.innertube.pages
+package com.huayin.music.innertube.pages
 
-import com.arturo254.innertube.models.AlbumItem
+import com.huayin.music.innertube.models.AlbumItem
 
 data class ExplorePage(
     val newReleaseAlbums: List<AlbumItem>,

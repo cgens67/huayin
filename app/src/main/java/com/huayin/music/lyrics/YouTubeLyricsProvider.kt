@@ -1,8 +1,8 @@
 package com.huayin.music.lyrics
 
 import android.content.Context
-import com.arturo254.innertube.YouTube
-import com.arturo254.innertube.models.WatchEndpoint
+import com.huayin.music.innertube.YouTube
+import com.huayin.music.innertube.models.WatchEndpoint
 
 object YouTubeLyricsProvider : LyricsProvider {
     override val name = "YouTube Music"

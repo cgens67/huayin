@@ -9,7 +9,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.exoplayer.offline.Download
-import com.arturo254.innertube.YouTube
+import com.huayin.music.innertube.YouTube
 import com.huayin.music.constants.AlbumFilter
 import com.huayin.music.constants.AlbumFilterKey
 import com.huayin.music.constants.AlbumSortDescendingKey

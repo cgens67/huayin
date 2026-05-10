@@ -1,7 +1,7 @@
-package com.arturo254.innertube.pages
+package com.huayin.music.innertube.pages
 
-import com.arturo254.innertube.models.MusicResponsiveListItemRenderer.FlexColumn
-import com.arturo254.innertube.models.Run
+import com.huayin.music.innertube.models.MusicResponsiveListItemRenderer.FlexColumn
+import com.huayin.music.innertube.models.Run
 
 object PageHelper {
     fun extractRuns(columns: List<FlexColumn>, typeLike: String): List<Run> {

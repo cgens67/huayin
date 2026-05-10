@@ -1,4 +1,4 @@
-package com.arturo254.innertube.models
+package com.huayin.music.innertube.models
 
 
 import kotlinx.serialization.SerialName
@@ -152,7 +152,7 @@ data class YouTubeDataPage(
                                     @Serializable
                                     data class Thumbnail(
                                         @SerialName("thumbnails")
-                                        val thumbnails: List<com.arturo254.innertube.models.Thumbnail>? = null,
+                                        val thumbnails: List<com.huayin.music.innertube.models.Thumbnail>? = null,
                                     )
 
                                     @Serializable

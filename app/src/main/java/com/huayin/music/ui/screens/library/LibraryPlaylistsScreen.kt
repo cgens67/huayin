@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.arturo254.innertube.utils.parseCookieString
+import com.huayin.music.innertube.utils.parseCookieString
 import com.huayin.music.LocalPlayerAwareWindowInsets
 import com.huayin.music.R
 import com.huayin.music.constants.CONTENT_TYPE_HEADER

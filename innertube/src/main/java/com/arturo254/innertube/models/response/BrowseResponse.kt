@@ -1,19 +1,19 @@
-package com.arturo254.innertube.models.response
+package com.huayin.music.innertube.models.response
 
-import com.arturo254.innertube.models.Button
-import com.arturo254.innertube.models.Continuation
-import com.arturo254.innertube.models.GridRenderer
-import com.arturo254.innertube.models.Menu
-import com.arturo254.innertube.models.MusicResponsiveListItemRenderer
-import com.arturo254.innertube.models.MusicShelfRenderer
-import com.arturo254.innertube.models.ResponseContext
-import com.arturo254.innertube.models.Runs
-import com.arturo254.innertube.models.SectionListRenderer
-import com.arturo254.innertube.models.SubscriptionButton
-import com.arturo254.innertube.models.Tabs
-import com.arturo254.innertube.models.ThumbnailRenderer
-import com.arturo254.innertube.models.Thumbnails
-import com.arturo254.innertube.pages.LibraryContinuationPage
+import com.huayin.music.innertube.models.Button
+import com.huayin.music.innertube.models.Continuation
+import com.huayin.music.innertube.models.GridRenderer
+import com.huayin.music.innertube.models.Menu
+import com.huayin.music.innertube.models.MusicResponsiveListItemRenderer
+import com.huayin.music.innertube.models.MusicShelfRenderer
+import com.huayin.music.innertube.models.ResponseContext
+import com.huayin.music.innertube.models.Runs
+import com.huayin.music.innertube.models.SectionListRenderer
+import com.huayin.music.innertube.models.SubscriptionButton
+import com.huayin.music.innertube.models.Tabs
+import com.huayin.music.innertube.models.ThumbnailRenderer
+import com.huayin.music.innertube.models.Thumbnails
+import com.huayin.music.innertube.pages.LibraryContinuationPage
 import kotlinx.serialization.Serializable
 
 @Serializable

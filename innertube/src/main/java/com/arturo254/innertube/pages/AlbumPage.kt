@@ -1,18 +1,18 @@
-package com.arturo254.innertube.pages
+package com.huayin.music.innertube.pages
 
-import com.arturo254.innertube.YouTube
-import com.arturo254.innertube.models.Album
-import com.arturo254.innertube.models.AlbumItem
-import com.arturo254.innertube.models.Artist
-import com.arturo254.innertube.models.MusicResponsiveHeaderRenderer
-import com.arturo254.innertube.models.MusicResponsiveListItemRenderer
-import com.arturo254.innertube.models.SongItem
-import com.arturo254.innertube.models.oddElements
-import com.arturo254.innertube.utils.parseTime
-import com.arturo254.innertube.models.getItems
-import com.arturo254.innertube.models.oddElements
-import com.arturo254.innertube.models.response.BrowseResponse
-import com.arturo254.innertube.models.splitBySeparator
+import com.huayin.music.innertube.YouTube
+import com.huayin.music.innertube.models.Album
+import com.huayin.music.innertube.models.AlbumItem
+import com.huayin.music.innertube.models.Artist
+import com.huayin.music.innertube.models.MusicResponsiveHeaderRenderer
+import com.huayin.music.innertube.models.MusicResponsiveListItemRenderer
+import com.huayin.music.innertube.models.SongItem
+import com.huayin.music.innertube.models.oddElements
+import com.huayin.music.innertube.utils.parseTime
+import com.huayin.music.innertube.models.getItems
+import com.huayin.music.innertube.models.oddElements
+import com.huayin.music.innertube.models.response.BrowseResponse
+import com.huayin.music.innertube.models.splitBySeparator
 
 data class AlbumPage(
     val album: AlbumItem,

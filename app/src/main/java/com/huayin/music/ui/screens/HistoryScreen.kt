@@ -47,7 +47,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.arturo254.innertube.utils.parseCookieString
+import com.huayin.music.innertube.utils.parseCookieString
 import com.huayin.music.LocalDatabase
 import com.huayin.music.LocalPlayerAwareWindowInsets
 import com.huayin.music.LocalPlayerConnection

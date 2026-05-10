@@ -76,11 +76,11 @@ import androidx.compose.ui.util.fastForEach
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.arturo254.innertube.models.AlbumItem
-import com.arturo254.innertube.models.ArtistItem
-import com.arturo254.innertube.models.PlaylistItem
-import com.arturo254.innertube.models.SongItem
-import com.arturo254.innertube.models.WatchEndpoint
+import com.huayin.music.innertube.models.AlbumItem
+import com.huayin.music.innertube.models.ArtistItem
+import com.huayin.music.innertube.models.PlaylistItem
+import com.huayin.music.innertube.models.SongItem
+import com.huayin.music.innertube.models.WatchEndpoint
 import com.huayin.music.LocalDatabase
 import com.huayin.music.LocalPlayerAwareWindowInsets
 import com.huayin.music.LocalPlayerConnection

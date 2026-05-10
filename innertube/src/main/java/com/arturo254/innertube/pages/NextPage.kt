@@ -1,14 +1,14 @@
-package com.arturo254.innertube.pages
+package com.huayin.music.innertube.pages
 
-import com.arturo254.innertube.models.Album
-import com.arturo254.innertube.models.Artist
-import com.arturo254.innertube.models.BrowseEndpoint
-import com.arturo254.innertube.models.PlaylistPanelVideoRenderer
-import com.arturo254.innertube.models.SongItem
-import com.arturo254.innertube.models.WatchEndpoint
-import com.arturo254.innertube.models.oddElements
-import com.arturo254.innertube.models.splitBySeparator
-import com.arturo254.innertube.utils.parseTime
+import com.huayin.music.innertube.models.Album
+import com.huayin.music.innertube.models.Artist
+import com.huayin.music.innertube.models.BrowseEndpoint
+import com.huayin.music.innertube.models.PlaylistPanelVideoRenderer
+import com.huayin.music.innertube.models.SongItem
+import com.huayin.music.innertube.models.WatchEndpoint
+import com.huayin.music.innertube.models.oddElements
+import com.huayin.music.innertube.models.splitBySeparator
+import com.huayin.music.innertube.utils.parseTime
 
 data class NextResult(
     val title: String? = null,

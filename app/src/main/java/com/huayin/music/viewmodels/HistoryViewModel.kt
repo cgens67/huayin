@@ -3,8 +3,8 @@ package com.huayin.music.viewmodels
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arturo254.innertube.YouTube
-import com.arturo254.innertube.pages.HistoryPage
+import com.huayin.music.innertube.YouTube
+import com.huayin.music.innertube.pages.HistoryPage
 import com.huayin.music.constants.HistorySource
 import com.huayin.music.db.MusicDatabase
 import com.huayin.music.utils.reportException

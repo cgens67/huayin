@@ -1,6 +1,6 @@
-package com.arturo254.innertube.models.response
+package com.huayin.music.innertube.models.response
  
- import com.arturo254.innertube.models.MusicShelfRenderer
+ import com.huayin.music.innertube.models.MusicShelfRenderer
  import kotlinx.serialization.Serializable
  
  @Serializable

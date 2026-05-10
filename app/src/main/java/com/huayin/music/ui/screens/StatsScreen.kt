@@ -56,7 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.arturo254.innertube.models.WatchEndpoint
+import com.huayin.music.innertube.models.WatchEndpoint
 import com.huayin.music.LocalPlayerAwareWindowInsets
 import com.huayin.music.LocalPlayerConnection
 import com.huayin.music.R

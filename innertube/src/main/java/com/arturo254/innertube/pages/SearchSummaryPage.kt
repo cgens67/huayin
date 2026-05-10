@@ -1,22 +1,22 @@
-package com.arturo254.innertube.pages
+package com.huayin.music.innertube.pages
 
-import com.arturo254.innertube.models.Album
-import com.arturo254.innertube.models.AlbumItem
-import com.arturo254.innertube.models.Artist
-import com.arturo254.innertube.models.ArtistItem
-import com.arturo254.innertube.models.BrowseEndpoint.BrowseEndpointContextSupportedConfigs.BrowseEndpointContextMusicConfig.Companion.MUSIC_PAGE_TYPE_ALBUM
-import com.arturo254.innertube.models.BrowseEndpoint.BrowseEndpointContextSupportedConfigs.BrowseEndpointContextMusicConfig.Companion.MUSIC_PAGE_TYPE_ARTIST
-import com.arturo254.innertube.models.BrowseEndpoint.BrowseEndpointContextSupportedConfigs.BrowseEndpointContextMusicConfig.Companion.MUSIC_PAGE_TYPE_USER_CHANNEL
-import com.arturo254.innertube.models.MusicCardShelfRenderer
-import com.arturo254.innertube.models.MusicResponsiveListItemRenderer
-import com.arturo254.innertube.models.PlaylistItem
-import com.arturo254.innertube.models.SongItem
-import com.arturo254.innertube.models.YTItem
-import com.arturo254.innertube.models.clean
-import com.arturo254.innertube.models.filterExplicit
-import com.arturo254.innertube.models.oddElements
-import com.arturo254.innertube.models.splitBySeparator
-import com.arturo254.innertube.utils.parseTime
+import com.huayin.music.innertube.models.Album
+import com.huayin.music.innertube.models.AlbumItem
+import com.huayin.music.innertube.models.Artist
+import com.huayin.music.innertube.models.ArtistItem
+import com.huayin.music.innertube.models.BrowseEndpoint.BrowseEndpointContextSupportedConfigs.BrowseEndpointContextMusicConfig.Companion.MUSIC_PAGE_TYPE_ALBUM
+import com.huayin.music.innertube.models.BrowseEndpoint.BrowseEndpointContextSupportedConfigs.BrowseEndpointContextMusicConfig.Companion.MUSIC_PAGE_TYPE_ARTIST
+import com.huayin.music.innertube.models.BrowseEndpoint.BrowseEndpointContextSupportedConfigs.BrowseEndpointContextMusicConfig.Companion.MUSIC_PAGE_TYPE_USER_CHANNEL
+import com.huayin.music.innertube.models.MusicCardShelfRenderer
+import com.huayin.music.innertube.models.MusicResponsiveListItemRenderer
+import com.huayin.music.innertube.models.PlaylistItem
+import com.huayin.music.innertube.models.SongItem
+import com.huayin.music.innertube.models.YTItem
+import com.huayin.music.innertube.models.clean
+import com.huayin.music.innertube.models.filterExplicit
+import com.huayin.music.innertube.models.oddElements
+import com.huayin.music.innertube.models.splitBySeparator
+import com.huayin.music.innertube.utils.parseTime
 
 data class SearchSummary(
     val title: String,

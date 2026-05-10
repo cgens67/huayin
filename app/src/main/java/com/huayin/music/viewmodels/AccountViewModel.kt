@@ -2,11 +2,11 @@ package com.huayin.music.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arturo254.innertube.YouTube
-import com.arturo254.innertube.models.AlbumItem
-import com.arturo254.innertube.models.ArtistItem
-import com.arturo254.innertube.models.PlaylistItem
-import com.arturo254.innertube.utils.completedLibraryPage
+import com.huayin.music.innertube.YouTube
+import com.huayin.music.innertube.models.AlbumItem
+import com.huayin.music.innertube.models.ArtistItem
+import com.huayin.music.innertube.models.PlaylistItem
+import com.huayin.music.innertube.utils.completedLibraryPage
 import com.huayin.music.utils.reportException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -1,8 +1,8 @@
-package com.arturo254.innertube.pages
+package com.huayin.music.innertube.pages
 
-import com.arturo254.innertube.YouTube
-import com.arturo254.innertube.models.YouTubeClient
-import com.arturo254.innertube.models.response.PlayerResponse
+import com.huayin.music.innertube.YouTube
+import com.huayin.music.innertube.models.YouTubeClient
+import com.huayin.music.innertube.models.response.PlayerResponse
 import io.ktor.http.URLBuilder
 import io.ktor.http.parseQueryString
 import okhttp3.OkHttpClient

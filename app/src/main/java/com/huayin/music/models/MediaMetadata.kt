@@ -1,7 +1,7 @@
 package com.huayin.music.models
 
 import androidx.compose.runtime.Immutable
-import com.arturo254.innertube.models.SongItem
+import com.huayin.music.innertube.models.SongItem
 import com.huayin.music.db.entities.Song
 import com.huayin.music.db.entities.SongEntity
 import com.huayin.music.ui.utils.resize

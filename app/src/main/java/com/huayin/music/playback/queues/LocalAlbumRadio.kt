@@ -1,8 +1,8 @@
 package com.huayin.music.playback.queues
 
 import androidx.media3.common.MediaItem
-import com.arturo254.innertube.YouTube
-import com.arturo254.innertube.models.WatchEndpoint
+import com.huayin.music.innertube.YouTube
+import com.huayin.music.innertube.models.WatchEndpoint
 import com.huayin.music.db.entities.AlbumWithSongs
 import com.huayin.music.extensions.toMediaItem
 import com.huayin.music.models.MediaMetadata

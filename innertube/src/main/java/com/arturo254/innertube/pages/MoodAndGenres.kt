@@ -1,9 +1,9 @@
-package com.arturo254.innertube.pages
+package com.huayin.music.innertube.pages
 
-import com.arturo254.innertube.models.BrowseEndpoint
-import com.arturo254.innertube.models.GridRenderer
-import com.arturo254.innertube.models.MusicNavigationButtonRenderer
-import com.arturo254.innertube.models.SectionListRenderer
+import com.huayin.music.innertube.models.BrowseEndpoint
+import com.huayin.music.innertube.models.GridRenderer
+import com.huayin.music.innertube.models.MusicNavigationButtonRenderer
+import com.huayin.music.innertube.models.SectionListRenderer
 
 data class MoodAndGenres(
     val title: String,

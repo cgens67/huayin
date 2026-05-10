@@ -48,10 +48,10 @@ import androidx.media3.exoplayer.offline.Download
 import androidx.media3.exoplayer.offline.DownloadRequest
 import androidx.media3.exoplayer.offline.DownloadService
 import coil.compose.AsyncImage
-import com.arturo254.innertube.YouTube
-import com.arturo254.innertube.models.PlaylistItem
-import com.arturo254.innertube.models.SongItem
-import com.arturo254.innertube.utils.completed
+import com.huayin.music.innertube.YouTube
+import com.huayin.music.innertube.models.PlaylistItem
+import com.huayin.music.innertube.models.SongItem
+import com.huayin.music.innertube.utils.completed
 import com.huayin.music.LocalDatabase
 import com.huayin.music.LocalDownloadUtil
 import com.huayin.music.LocalPlayerConnection

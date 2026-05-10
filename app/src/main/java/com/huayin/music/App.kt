@@ -10,9 +10,9 @@ import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.disk.DiskCache
 import coil.request.CachePolicy
-import com.arturo254.innertube.YouTube
-import com.arturo254.innertube.models.YouTubeLocale
-import com.arturo254.kugou.KuGou
+import com.huayin.music.innertube.YouTube
+import com.huayin.music.innertube.models.YouTubeLocale
+import com.huayin.music.kugou.KuGou
 import com.huayin.music.constants.AccountChannelHandleKey
 import com.huayin.music.constants.AccountEmailKey
 import com.huayin.music.constants.AccountNameKey

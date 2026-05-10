@@ -20,7 +20,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import com.arturo254.innertube.YouTube
+import com.huayin.music.innertube.YouTube
 import com.huayin.music.LocalDatabase
 import com.huayin.music.R
 import com.huayin.music.db.entities.PlaylistEntity

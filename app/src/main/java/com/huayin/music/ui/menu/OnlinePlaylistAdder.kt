@@ -27,8 +27,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
-import com.arturo254.innertube.YouTube
-import com.arturo254.innertube.models.SongItem
+import com.huayin.music.innertube.YouTube
+import com.huayin.music.innertube.models.SongItem
 import com.huayin.music.LocalDatabase
 import com.huayin.music.R
 import com.huayin.music.constants.ListThumbnailSize

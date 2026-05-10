@@ -3,7 +3,7 @@ package com.huayin.music.extensions
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import com.arturo254.innertube.utils.parseCookieString
+import com.huayin.music.innertube.utils.parseCookieString
 import com.huayin.music.constants.InnerTubeCookieKey
 import com.huayin.music.constants.YtmSyncKey
 import com.huayin.music.utils.dataStore

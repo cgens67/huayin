@@ -1,12 +1,12 @@
 package com.huayin.music.utils
 
-import com.arturo254.innertube.YouTube
-import com.arturo254.innertube.models.AlbumItem
-import com.arturo254.innertube.models.ArtistItem
-import com.arturo254.innertube.models.PlaylistItem
-import com.arturo254.innertube.models.SongItem
-import com.arturo254.innertube.utils.completed
-import com.arturo254.innertube.utils.completedLibraryPage
+import com.huayin.music.innertube.YouTube
+import com.huayin.music.innertube.models.AlbumItem
+import com.huayin.music.innertube.models.ArtistItem
+import com.huayin.music.innertube.models.PlaylistItem
+import com.huayin.music.innertube.models.SongItem
+import com.huayin.music.innertube.utils.completed
+import com.huayin.music.innertube.utils.completedLibraryPage
 import com.huayin.music.db.MusicDatabase
 import com.huayin.music.db.entities.ArtistEntity
 import com.huayin.music.db.entities.PlaylistEntity

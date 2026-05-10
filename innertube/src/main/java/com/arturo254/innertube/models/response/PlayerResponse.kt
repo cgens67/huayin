@@ -1,7 +1,7 @@
-package com.arturo254.innertube.models.response
+package com.huayin.music.innertube.models.response
 
-import com.arturo254.innertube.models.ResponseContext
-import com.arturo254.innertube.models.Thumbnails
+import com.huayin.music.innertube.models.ResponseContext
+import com.huayin.music.innertube.models.Thumbnails
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

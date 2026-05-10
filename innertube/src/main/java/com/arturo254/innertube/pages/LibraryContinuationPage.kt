@@ -1,6 +1,6 @@
-package com.arturo254.innertube.pages
+package com.huayin.music.innertube.pages
 
-import com.arturo254.innertube.models.YTItem
+import com.huayin.music.innertube.models.YTItem
 
 data class LibraryContinuationPage(
     val items: List<YTItem>,

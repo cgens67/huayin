@@ -1,7 +1,7 @@
-package com.arturo254.innertube.models.response
+package com.huayin.music.innertube.models.response
 
-import com.arturo254.innertube.models.AccountInfo
-import com.arturo254.innertube.models.Runs
+import com.huayin.music.innertube.models.AccountInfo
+import com.huayin.music.innertube.models.Runs
 import kotlinx.serialization.Serializable
 
 @Serializable

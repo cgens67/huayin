@@ -3,7 +3,7 @@ package com.huayin.music.extensions
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata.MEDIA_TYPE_MUSIC
-import com.arturo254.innertube.models.SongItem
+import com.huayin.music.innertube.models.SongItem
 import com.huayin.music.db.entities.Song
 import com.huayin.music.models.MediaMetadata
 import com.huayin.music.models.toMediaMetadata

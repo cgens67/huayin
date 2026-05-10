@@ -1,6 +1,6 @@
-package com.arturo254.innertube.pages
+package com.huayin.music.innertube.pages
 
-import com.arturo254.innertube.models.SongItem
+import com.huayin.music.innertube.models.SongItem
 
 data class PlaylistContinuationPage(
     val songs: List<SongItem>,

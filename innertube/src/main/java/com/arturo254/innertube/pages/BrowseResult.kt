@@ -1,7 +1,7 @@
-package com.arturo254.innertube.pages
+package com.huayin.music.innertube.pages
 
-import com.arturo254.innertube.models.YTItem
-import com.arturo254.innertube.models.filterExplicit
+import com.huayin.music.innertube.models.YTItem
+import com.huayin.music.innertube.models.filterExplicit
 
 data class BrowseResult(
     val title: String?,

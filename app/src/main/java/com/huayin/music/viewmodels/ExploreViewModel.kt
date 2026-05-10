@@ -3,9 +3,9 @@ package com.huayin.music.viewmodels
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arturo254.innertube.YouTube
-import com.arturo254.innertube.models.filterExplicit
-import com.arturo254.innertube.pages.ExplorePage
+import com.huayin.music.innertube.YouTube
+import com.huayin.music.innertube.models.filterExplicit
+import com.huayin.music.innertube.pages.ExplorePage
 import com.huayin.music.constants.HideExplicitKey
 import com.huayin.music.db.MusicDatabase
 import com.huayin.music.utils.dataStore

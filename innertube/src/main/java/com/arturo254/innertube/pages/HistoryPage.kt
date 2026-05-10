@@ -1,14 +1,14 @@
 
-package com.arturo254.innertube.pages
+package com.huayin.music.innertube.pages
 
-import com.arturo254.innertube.models.Album
-import com.arturo254.innertube.models.Artist
-import com.arturo254.innertube.models.MusicResponsiveListItemRenderer
-import com.arturo254.innertube.models.MusicShelfRenderer
-import com.arturo254.innertube.models.SongItem
-import com.arturo254.innertube.models.getItems
-import com.arturo254.innertube.models.oddElements
-import com.arturo254.innertube.utils.parseTime
+import com.huayin.music.innertube.models.Album
+import com.huayin.music.innertube.models.Artist
+import com.huayin.music.innertube.models.MusicResponsiveListItemRenderer
+import com.huayin.music.innertube.models.MusicShelfRenderer
+import com.huayin.music.innertube.models.SongItem
+import com.huayin.music.innertube.models.getItems
+import com.huayin.music.innertube.models.oddElements
+import com.huayin.music.innertube.utils.parseTime
 
 data class HistoryPage(
     val sections: List<HistorySection>?,

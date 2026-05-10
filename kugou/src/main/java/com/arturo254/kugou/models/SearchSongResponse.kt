@@ -1,4 +1,4 @@
-package com.arturo254.kugou.models
+package com.huayin.music.kugou.models
 
 import kotlinx.serialization.Serializable
 

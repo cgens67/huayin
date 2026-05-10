@@ -1,4 +1,4 @@
-package com.arturo254.innertube.models
+package com.huayin.music.innertube.models
 
 data class MediaInfo(
     val videoId: String,

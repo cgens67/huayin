@@ -2,7 +2,7 @@ package com.huayin.music.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arturo254.innertube.YouTube
+import com.huayin.music.innertube.YouTube
 import com.huayin.music.constants.statToPeriod
 import com.huayin.music.db.MusicDatabase
 import com.huayin.music.ui.screens.OptionStats

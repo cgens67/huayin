@@ -77,8 +77,8 @@ import androidx.compose.ui.util.fastAny
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.arturo254.innertube.models.SongItem
-import com.arturo254.innertube.models.WatchEndpoint
+import com.huayin.music.innertube.models.SongItem
+import com.huayin.music.innertube.models.WatchEndpoint
 import com.huayin.music.LocalDatabase
 import com.huayin.music.LocalPlayerAwareWindowInsets
 import com.huayin.music.LocalPlayerConnection

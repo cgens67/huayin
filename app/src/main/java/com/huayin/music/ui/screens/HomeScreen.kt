@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -53,6 +54,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -335,8 +337,7 @@ fun HomeScreen(
                         state = carouselState,
                         preferredItemWidth = 140.dp,
                         itemSpacing = 8.dp,
-                        contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal)
-                                .add(WindowInsets(left = 16.dp, right = 16.dp)).asPaddingValues(),
+                        contentPadding = PaddingValues(horizontal = 16.dp),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(180.dp)

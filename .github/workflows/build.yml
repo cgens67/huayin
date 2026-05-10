@@ -1,18 +1,19 @@
-name: Build APK
+name: Build Release APK
 
 on:
   push:
-    branches: [ "**" ]
+    branches: [ "main", "master" ]
   pull_request:
-    branches: [ "**" ]
+    branches: [ "main", "master" ]
+  workflow_dispatch: # Allows you to trigger the build manually from the Actions tab
 
 jobs:
   build:
-    name: Build Android APK
+    name: Build Release
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           submodules: recursive
@@ -24,26 +25,37 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Auto-fix lingering old package imports
-        run: |
-          echo "Sweeping codebase for any missed package renames..."
-          find . -type f \( -name "*.kt" -o -name "*.xml" -o -name "*.kts" \) -exec sed -i 's/com\.arturo254\.opentune/com.huayin.music/g' {} +
-          find . -type f \( -name "*.kt" -o -name "*.xml" -o -name "*.kts" \) -exec sed -i 's/com\.arturo254/com.huayin/g' {} +
-
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Clean and Build Debug APK
-        # We run 'clean' to clear corrupted KSP caches
-        # We use --info so that if a Kotlin import is broken, it actually prints it in the GitHub Action logs
+      - name: Generate temporary keystore
         run: |
-          ./gradlew clean
-          ./gradlew assembleDebug --no-daemon --stacktrace --info
+          # Generates a temporary keystore valid for 10000 days
+          keytool -genkey -v \
+            -keystore temp_release.keystore \
+            -alias temp_alias \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -storepass temp_password \
+            -keypass temp_password \
+            -dname "CN=Temp, OU=Temp, O=Temp, L=Temp, S=Temp, C=US"
+          
+          # Save the absolute path of the generated keystore to GitHub Environment variables
+          echo "TEMP_KEYSTORE_PATH=$(pwd)/temp_release.keystore" >> $GITHUB_ENV
 
-      - name: Upload APK Artifact
+      - name: Build Release APK
+        env:
+          # Feed the temporary keystore details into the environment variables your app expects
+          APP_RELEASE_STORE_FILE: ${{ env.TEMP_KEYSTORE_PATH }}
+          APP_RELEASE_STORE_PASSWORD: temp_password
+          APP_RELEASE_KEY_ALIAS: temp_alias
+          APP_RELEASE_KEY_PASSWORD: temp_password
+        run: ./gradlew assembleRelease
+
+      - name: Upload Release APK Artifact
         uses: actions/upload-artifact@v4
-        if: success()
         with:
-          name: HuaYin-Debug-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
-          retention-days: 7
+          name: OpenTune-Release-APK
+          path: app/build/outputs/apk/release/*.apk
+          retention-days: 90

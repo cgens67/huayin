@@ -1,5 +1,8 @@
 package com.huayin.music.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -14,8 +17,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -24,9 +29,11 @@ import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,7 +48,6 @@ import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -52,6 +58,7 @@ import com.huayin.music.R
 import com.huayin.music.constants.AgreedToPrivacyPolicyKey
 import com.huayin.music.constants.HasSeenWelcomeKey
 import com.huayin.music.utils.dataStore
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -60,167 +67,223 @@ fun WelcomeScreen(navController: NavController) {
     val coroutineScope = rememberCoroutineScope()
     var privacyAgreed by remember { mutableStateOf(false) }
     var showWarningDialog by remember { mutableStateOf(false) }
+    var isReadyToAnimate by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        delay(150)
+        isReadyToAnimate = true
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = MaterialTheme.colorScheme.surface
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 32.dp, vertical = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             
-            // Top Section (Hero Graphic & Titles - M3 Expressive)
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.Center
+            // Material 3 Expressive Hero Banner with asymmetric large shapes
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                shape = RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp, bottomStart = 88.dp, bottomEnd = 24.dp),
+                color = MaterialTheme.colorScheme.primaryContainer,
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(160.dp)
-                        .clip(RoundedCornerShape(40.dp))
-                        .background(MaterialTheme.colorScheme.primaryContainer),
-                    contentAlignment = Alignment.Center
+                Column(
+                    modifier = Modifier.padding(top = 48.dp, bottom = 48.dp, start = 24.dp, end = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Icon(
-                        painter = painterResource(R.drawable.music_note),
-                        contentDescription = "HuaYin Logo",
-                        modifier = Modifier.size(80.dp),
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(48.dp))
-
-                Text(
-                    text = "华音 (OpenTune)",
-                    style = MaterialTheme.typography.displaySmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = "纯净、合规的开源音乐播放体验。探索海量音乐，无需妥协您的隐私。",
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    lineHeight = 26.sp
-                )
-            }
-
-            // Bottom Section (Agreements & Action - M3 Expressive)
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                // Checkbox & Policy Links
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null
-                        ) { privacyAgreed = !privacyAgreed }
-                        .padding(vertical = 8.dp, horizontal = 4.dp),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Checkbox(
-                        checked = privacyAgreed,
-                        onCheckedChange = { privacyAgreed = it },
-                        colors = CheckboxDefaults.colors(
-                            checkedColor = MaterialTheme.colorScheme.primary,
-                            uncheckedColor = MaterialTheme.colorScheme.outline
+                    Box(
+                        modifier = Modifier
+                            .size(104.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                shape = RoundedCornerShape(32.dp)
+                            )
+                            .padding(24.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.music_note),
+                            contentDescription = "HuaYin Logo",
+                            modifier = Modifier.size(56.dp),
+                            tint = MaterialTheme.colorScheme.primaryContainer
                         )
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    
-                    val policyText = buildAnnotatedString {
-                        withStyle(SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)) {
-                            append("我已阅读并同意")
-                        }
-                        
-                        val userAgreementLink = LinkAnnotation.Clickable("user_agreement") {
-                            navController.navigate("privacy_policy")
-                        }
-                        withLink(userAgreementLink) {
-                            withStyle(SpanStyle(
-                                color = MaterialTheme.colorScheme.primary, 
-                                fontWeight = FontWeight.SemiBold
-                            )) {
-                                append("《用户服务协议》")
-                            }
-                        }
-                        
-                        withStyle(SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)) {
-                            append("与")
-                        }
-
-                        val privacyPolicyLink = LinkAnnotation.Clickable("privacy_policy") {
-                            navController.navigate("privacy_policy")
-                        }
-                        withLink(privacyPolicyLink) {
-                            withStyle(SpanStyle(
-                                color = MaterialTheme.colorScheme.primary, 
-                                fontWeight = FontWeight.SemiBold
-                            )) {
-                                append("《隐私政策》")
-                            }
-                        }
                     }
 
+                    Spacer(modifier = Modifier.height(32.dp))
+
                     Text(
-                        text = policyText,
-                        style = MaterialTheme.typography.bodyMedium,
+                        text = "开启华音",
+                        style = MaterialTheme.typography.displayMedium,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        letterSpacing = (-1.5).sp
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Text(
+                        text = "全功能无忧聆听。\n无缝构建专属个人音轨。",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.85f),
+                        fontWeight = FontWeight.Medium,
+                        lineHeight = 32.sp
                     )
                 }
+            }
 
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Expressive Action Button
-                Button(
-                    onClick = {
-                        if (privacyAgreed) {
-                            coroutineScope.launch {
-                                context.dataStore.edit {
-                                    it[HasSeenWelcomeKey] = true
-                                    it[AgreedToPrivacyPolicyKey] = true
-                                }
-                                navController.navigate(Screens.Home.route) {
-                                    popUpTo("welcome") { inclusive = true }
-                                }
-                            }
-                        } else {
-                            showWarningDialog = true
-                        }
-                    },
+            // Staggered animated expressive network warning card
+            AnimatedVisibility(
+                visible = isReadyToAnimate,
+                enter = fadeIn() + expandVertically()
+            ) {
+                Surface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(64.dp), // Expressive height
-                    shape = CircleShape,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    )
+                        .padding(horizontal = 24.dp, vertical = 8.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    tonalElevation = 2.dp
                 ) {
-                    Text(
-                        text = "开始体验",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Row(
+                        modifier = Modifier.padding(20.dp),
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.wifi_proxy), // Substitute network/proxy icon
+                            contentDescription = "Network",
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                            modifier = Modifier.size(32.dp)
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            Text(
+                                text = "关于网络连通性",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "流媒体直连可能受到区域政策限制，如果您所在的地区不可访问相关外源（例如中国大陆等），首次进行应用初始化与数据拉取时可能需配合代理/VPN才可成功解析播放内容。",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f),
+                                lineHeight = 20.sp
+                            )
+                        }
+                    }
                 }
-                
-                Spacer(modifier = Modifier.height(16.dp))
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Extra thick Checkbox area 
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .padding(horizontal = 20.dp)
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(20.dp))
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) { privacyAgreed = !privacyAgreed }
+                    .padding(horizontal = 8.dp, vertical = 12.dp)
+            ) {
+                Checkbox(
+                    checked = privacyAgreed,
+                    onCheckedChange = { privacyAgreed = it },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = MaterialTheme.colorScheme.primary,
+                        uncheckedColor = MaterialTheme.colorScheme.outline
+                    )
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                
+                val policyText = buildAnnotatedString {
+                    withStyle(SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)) {
+                        append("我已阅读并同意 ")
+                    }
+                    
+                    val userAgreementLink = LinkAnnotation.Clickable("user_agreement") {
+                        navController.navigate("privacy_policy")
+                    }
+                    withLink(userAgreementLink) {
+                        withStyle(SpanStyle(
+                            color = MaterialTheme.colorScheme.primary, 
+                            fontWeight = FontWeight.Bold
+                        )) {
+                            append("《用户服务协议》")
+                        }
+                    }
+                    
+                    withStyle(SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)) {
+                        append(" 及 ")
+                    }
+
+                    val privacyPolicyLink = LinkAnnotation.Clickable("privacy_policy") {
+                        navController.navigate("privacy_policy")
+                    }
+                    withLink(privacyPolicyLink) {
+                        withStyle(SpanStyle(
+                            color = MaterialTheme.colorScheme.primary, 
+                            fontWeight = FontWeight.Bold
+                        )) {
+                            append("《隐私政策》")
+                        }
+                    }
+                }
+
+                Text(
+                    text = policyText,
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Extra Chunky Action Button per MD3 Expressive standards
+            Button(
+                onClick = {
+                    if (privacyAgreed) {
+                        coroutineScope.launch {
+                            context.dataStore.edit {
+                                it[HasSeenWelcomeKey] = true
+                                it[AgreedToPrivacyPolicyKey] = true
+                            }
+                            navController.navigate(Screens.Home.route) {
+                                popUpTo("welcome") { inclusive = true }
+                            }
+                        }
+                    } else {
+                        showWarningDialog = true
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .height(72.dp),
+                shape = CircleShape,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            ) {
+                Text(
+                    text = "开启奇妙旅程",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 1.sp
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(48.dp))
         }
     }
 
@@ -229,24 +292,32 @@ fun WelcomeScreen(navController: NavController) {
             onDismissRequest = { showWarningDialog = false },
             title = { 
                 Text(
-                    text = "需要您的同意", 
+                    text = "权限获取通知", 
                     style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.ExtraBold
                 ) 
             },
             text = { 
                 Text(
-                    text = "为了保障您的合法权益及正常使用华音（OpenTune）的服务，请您在开始使用前仔细阅读并勾选同意《用户服务协议》与《隐私政策》。",
+                    text = "出于数据解析服务声明要求，必须先知悉阅读并勾选底部区域的《用户服务协议》及《隐私政策》后才能正常授权使用华音的所有核心体验功能。",
                     style = MaterialTheme.typography.bodyLarge,
+                    lineHeight = 24.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 ) 
             },
             confirmButton = {
-                TextButton(onClick = { showWarningDialog = false }) {
-                    Text("我知道了", fontWeight = FontWeight.Bold)
+                TextButton(
+                    onClick = { showWarningDialog = false },
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        "我已经知道了", 
+                        fontWeight = FontWeight.ExtraBold, 
+                        fontSize = 16.sp
+                    )
                 }
             },
-            shape = RoundedCornerShape(24.dp),
+            shape = RoundedCornerShape(32.dp),
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
         )
     }

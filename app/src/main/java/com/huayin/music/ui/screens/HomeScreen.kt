@@ -16,11 +16,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.add
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -41,9 +36,10 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
+import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -119,7 +115,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.random.Random
 
-// Render Helpers producing COMPACT blocks showing up lots of objects seamlessly.
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun CompactLocalItem(
@@ -145,7 +140,7 @@ private fun CompactLocalItem(
             modifier = Modifier
                 .height(88.dp)
                 .fillMaxWidth()
-                .clip(if (item is Artist) CircleShape else RoundedCornerShape(8.dp)),
+                .clip(if (item is Artist) CircleShape else RoundedCornerShape(12.dp)),
             contentAlignment = Alignment.Center
         ) {
             AsyncImage(
@@ -201,7 +196,7 @@ private fun CompactYTGridItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(1f)
-                .clip(if (item is ArtistItem) CircleShape else RoundedCornerShape(8.dp)),
+                .clip(if (item is ArtistItem) CircleShape else RoundedCornerShape(12.dp)),
             contentAlignment = Alignment.Center
         ) {
             AsyncImage(
@@ -303,7 +298,7 @@ fun HomeScreen(
             item {
                 Row(
                     modifier = Modifier
-                        .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
+                        .windowInsetsPadding(androidx.compose.foundation.layout.WindowInsets.systemBars.only(androidx.compose.foundation.layout.WindowInsetsSides.Horizontal))
                         .fillMaxWidth()
                         .animateItem()
                 ) {
@@ -330,7 +325,7 @@ fun HomeScreen(
                 }
             }
 
-            // Quick Picks - Tall Card LazyRow (Replaced M3 Carousel for strict corner radius and more visible items)
+            // Quick Picks: Redesigned for verticality and proper edge padding
             quickPicks?.takeIf { it.isNotEmpty() }?.let { quickPicksList ->
                 item {
                     NavigationTitle(
@@ -340,112 +335,115 @@ fun HomeScreen(
                 }
 
                 item {
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal)
-                            .add(WindowInsets(left = 16.dp, right = 16.dp)).asPaddingValues(),
+                    val carouselState = rememberCarouselState { quickPicksList.size }
+                    HorizontalMultiBrowseCarousel(
+                        state = carouselState,
+                        preferredItemWidth = 186.dp, // Balanced width for taller layout
+                        itemSpacing = 8.dp,
+                        contentPadding = PaddingValues(horizontal = 20.dp), // Prevents touching screen borders
                         modifier = Modifier
                             .fillMaxWidth()
+                            .height(280.dp) // Vertically longer as requested
                             .animateItem()
-                    ) {
-                        items(quickPicksList) { originalSong ->
-                            val song by database.song(originalSong.id).collectAsState(initial = originalSong)
-                            val isActive = song!!.id == mediaMetadata?.id
+                    ) { index ->
+                        val originalSong = quickPicksList[index]
+                        val song by database.song(originalSong.id).collectAsState(initial = originalSong)
+                        val isActive = song!!.id == mediaMetadata?.id
 
-                            Card(
-                                modifier = Modifier
-                                    .width(140.dp)
-                                    .height(240.dp)
-                                    .combinedClickable(
-                                        onClick = {
-                                            if (isActive) playerConnection.player.togglePlayPause()
-                                            else playerConnection.playQueue(YouTubeQueue.radio(song!!.toMediaMetadata()))
-                                        },
-                                        onLongClick = {
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            menuState.show {
-                                                SongMenu(
-                                                    originalSong = song!!,
-                                                    navController = navController,
-                                                    onDismiss = menuState::dismiss
-                                                )
-                                            }
+                        Card(
+                            modifier = Modifier
+                                .maskClip(RoundedCornerShape(24.dp)) // Correct way to handle M3 Carousel clipping
+                                .fillMaxSize()
+                                .combinedClickable(
+                                    onClick = {
+                                        if (isActive) playerConnection.player.togglePlayPause()
+                                        else playerConnection.playQueue(YouTubeQueue.radio(song!!.toMediaMetadata()))
+                                    },
+                                    onLongClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        menuState.show {
+                                            SongMenu(
+                                                originalSong = song!!,
+                                                navController = navController,
+                                                onDismiss = menuState::dismiss
+                                            )
                                         }
-                                    ),
-                                shape = RoundedCornerShape(24.dp),
-                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                            ) {
-                                Box(modifier = Modifier.fillMaxSize()) {
-                                    // Full Cover Background
-                                    AsyncImage(
-                                        model = song!!.song.thumbnailUrl,
-                                        contentDescription = null,
-                                        contentScale = ContentScale.Crop,
-                                        modifier = Modifier.fillMaxSize()
-                                    )
+                                    }
+                                ),
+                            shape = RoundedCornerShape(24.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                        ) {
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                AsyncImage(
+                                    model = song!!.song.thumbnailUrl,
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
 
-                                    // Gradient Scrim for readable text
+                                // Dark gradient for text readability
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .fillMaxHeight(0.6f)
+                                        .align(Alignment.BottomCenter)
+                                        .background(
+                                            Brush.verticalGradient(
+                                                colors = listOf(
+                                                    Color.Transparent,
+                                                    Color.Black.copy(alpha = 0.7f),
+                                                    Color.Black.copy(alpha = 0.9f)
+                                                )
+                                            )
+                                        )
+                                )
+
+                                // Playing overlay
+                                val overlayAlpha by animateFloatAsState(
+                                    targetValue = if (isActive) 1f else 0f,
+                                    animationSpec = tween(300),
+                                    label = "overlayAlpha"
+                                )
+                                if (overlayAlpha > 0f) {
                                     Box(
                                         modifier = Modifier
-                                            .fillMaxWidth()
-                                            .fillMaxHeight(0.6f)
-                                            .align(Alignment.BottomCenter)
-                                            .background(
-                                                Brush.verticalGradient(
-                                                    colors = listOf(
-                                                        Color.Transparent,
-                                                        Color.Black.copy(alpha = 0.6f),
-                                                        Color.Black.copy(alpha = 0.9f)
-                                                    )
-                                                )
-                                            )
-                                    )
-
-                                    // Active/Playing Overlay
-                                    val overlayAlpha by animateFloatAsState(
-                                        targetValue = if (isActive) 1f else 0f,
-                                        animationSpec = tween(300),
-                                        label = "overlayAlpha"
-                                    )
-                                    if (overlayAlpha > 0f) {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .background(Color.Black.copy(alpha = 0.4f * overlayAlpha)),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Icon(
-                                                painterResource(if (isPlaying) R.drawable.pause else R.drawable.play),
-                                                contentDescription = null,
-                                                tint = Color.White.copy(alpha = overlayAlpha),
-                                                modifier = Modifier.size(48.dp)
-                                            )
-                                        }
-                                    }
-
-                                    // Overlaid Content Details
-                                    Column(
-                                        modifier = Modifier
-                                            .align(Alignment.BottomStart)
-                                            .fillMaxWidth()
-                                            .padding(16.dp)
+                                            .fillMaxSize()
+                                            .background(Color.Black.copy(alpha = 0.4f * overlayAlpha)),
+                                        contentAlignment = Alignment.Center
                                     ) {
-                                        Text(
-                                            text = song!!.song.title,
-                                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black),
-                                            color = Color.White,
-                                            maxLines = 2,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                        Spacer(modifier = Modifier.height(4.dp))
-                                        Text(
-                                            text = song!!.artists.joinToString { it.name },
-                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
-                                            color = Color.White.copy(alpha = 0.85f),
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
+                                        Icon(
+                                            painterResource(if (isPlaying) R.drawable.pause else R.drawable.play),
+                                            contentDescription = null,
+                                            tint = Color.White.copy(alpha = overlayAlpha),
+                                            modifier = Modifier.size(48.dp)
                                         )
                                     }
+                                }
+
+                                // Song details overlaid
+                                Column(
+                                    modifier = Modifier
+                                        .align(Alignment.BottomStart)
+                                        .fillMaxWidth()
+                                        .padding(16.dp)
+                                ) {
+                                    Text(
+                                        text = song!!.song.title,
+                                        style = MaterialTheme.typography.titleMedium.copy(
+                                            fontWeight = FontWeight.Black,
+                                            lineHeight = 18.sp
+                                        ),
+                                        color = Color.White,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Text(
+                                        text = song!!.artists.joinToString { it.name },
+                                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+                                        color = Color.White.copy(alpha = 0.8f),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
                                 }
                             }
                         }
@@ -453,16 +451,13 @@ fun HomeScreen(
                 }
             }
 
-            // Extremely compressed categories rendering (Ultra thin horizontal blocks resolving space efficiently!)
+            // Categories: Shrunk to 88.dp width to show more content
             keepListening?.takeIf { it.isNotEmpty() }?.let { keepList ->
-                item {
-                    NavigationTitle(title = "不曾暂停续放队列")
-                }
+                item { NavigationTitle(title = "不曾暂停续放队列") }
                 item {
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal)
-                            .add(WindowInsets(left = 16.dp, right = 16.dp)).asPaddingValues(),
+                        contentPadding = PaddingValues(horizontal = 16.dp),
                         modifier = Modifier.animateItem()
                     ) {
                         items(keepList) { litem ->
@@ -523,8 +518,7 @@ fun HomeScreen(
                 item {
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal)
-                            .add(WindowInsets(left = 16.dp, right = 16.dp)).asPaddingValues()
+                        contentPadding = PaddingValues(horizontal = 16.dp)
                     ) {
                         items(accountPlists) {
                             CompactYTGridItem(
@@ -533,7 +527,7 @@ fun HomeScreen(
                                 isPlaying = isPlaying,
                                 onNavigate = { navController.navigate("online_playlist/${it.id}") },
                                 onMenuShow = {
-                                    menuState.show { YouTubePlaylistMenu(it as PlaylistItem, coroutineScope= scope, onDismiss = menuState::dismiss) }
+                                    menuState.show { YouTubePlaylistMenu(it as com.huayin.music.innertube.models.PlaylistItem, coroutineScope= scope, onDismiss = menuState::dismiss) }
                                 }
                             )
                         }
@@ -562,8 +556,7 @@ fun HomeScreen(
                 item {
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal)
-                            .add(WindowInsets(left = 16.dp, right = 16.dp)).asPaddingValues()
+                        contentPadding = PaddingValues(horizontal = 16.dp)
                     ) {
                         items(similarData.items) { yi ->
                             CompactYTGridItem(
@@ -575,7 +568,7 @@ fun HomeScreen(
                                         is SongItem -> playerConnection.playQueue(YouTubeQueue(yi.endpoint?:WatchEndpoint(videoId=yi.id), yi.toMediaMetadata()))
                                         is AlbumItem -> navController.navigate("album/${yi.id}")
                                         is ArtistItem -> navController.navigate("artist/${yi.id}")
-                                        is PlaylistItem -> navController.navigate("online_playlist/${yi.id}")
+                                        is com.huayin.music.innertube.models.PlaylistItem -> navController.navigate("online_playlist/${yi.id}")
                                     }
                                 },
                                 onMenuShow = {
@@ -584,7 +577,7 @@ fun HomeScreen(
                                             is SongItem -> YouTubeSongMenu(yi, navController, menuState::dismiss)
                                             is AlbumItem -> YouTubeAlbumMenu(yi, navController, menuState::dismiss)
                                             is ArtistItem -> YouTubeArtistMenu(yi, menuState::dismiss)
-                                            is PlaylistItem -> YouTubePlaylistMenu(yi, coroutineScope = scope, onDismiss = menuState::dismiss)
+                                            is com.huayin.music.innertube.models.PlaylistItem -> YouTubePlaylistMenu(yi, coroutineScope = scope, onDismiss = menuState::dismiss)
                                         }
                                     }
                                 }
@@ -596,16 +589,12 @@ fun HomeScreen(
 
             homePage?.sections?.forEach { sectionInfo ->
                 item {
-                    NavigationTitle(
-                        title = sectionInfo.title,
-                        label = sectionInfo.label,
-                    )
+                    NavigationTitle(title = sectionInfo.title, label = sectionInfo.label)
                 }
                 item {
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal)
-                            .add(WindowInsets(left = 16.dp, right = 16.dp)).asPaddingValues()
+                        contentPadding = PaddingValues(horizontal = 16.dp)
                     ) {
                         items(sectionInfo.items) { itemVal ->
                             CompactYTGridItem(
@@ -617,7 +606,7 @@ fun HomeScreen(
                                         is SongItem -> playerConnection.playQueue(YouTubeQueue(itemVal.endpoint?:WatchEndpoint(videoId=itemVal.id), itemVal.toMediaMetadata()))
                                         is AlbumItem -> navController.navigate("album/${itemVal.id}")
                                         is ArtistItem -> navController.navigate("artist/${itemVal.id}")
-                                        is PlaylistItem -> navController.navigate("online_playlist/${itemVal.id}")
+                                        is com.huayin.music.innertube.models.PlaylistItem -> navController.navigate("online_playlist/${itemVal.id}")
                                     }
                                 },
                                 onMenuShow = {
@@ -626,7 +615,7 @@ fun HomeScreen(
                                             is SongItem -> YouTubeSongMenu(itemVal, navController, menuState::dismiss)
                                             is AlbumItem -> YouTubeAlbumMenu(itemVal, navController, menuState::dismiss)
                                             is ArtistItem -> YouTubeArtistMenu(itemVal, menuState::dismiss)
-                                            is PlaylistItem -> YouTubePlaylistMenu(itemVal, coroutineScope = scope, onDismiss = menuState::dismiss)
+                                            is com.huayin.music.innertube.models.PlaylistItem -> YouTubePlaylistMenu(itemVal, coroutineScope = scope, onDismiss = menuState::dismiss)
                                         }
                                     }
                                 }
@@ -641,8 +630,7 @@ fun HomeScreen(
                 item {
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal)
-                            .add(WindowInsets(left = 16.dp, right = 16.dp)).asPaddingValues()
+                        contentPadding = PaddingValues(horizontal = 16.dp)
                     ) {
                         items(newR) { al->
                             CompactYTGridItem(
@@ -662,8 +650,7 @@ fun HomeScreen(
                 item {
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal)
-                            .add(WindowInsets(left = 16.dp, right = 16.dp)).asPaddingValues()
+                        contentPadding = PaddingValues(horizontal = 16.dp)
                     ) {
                         items(favList){ flocal ->
                             val sval by database.song(flocal.id).collectAsState(initial = flocal)
@@ -692,9 +679,7 @@ fun HomeScreen(
                     ShimmerHost {
                         TextPlaceholder(
                             height = 36.dp,
-                            modifier = Modifier
-                                .padding(12.dp)
-                                .width(250.dp),
+                            modifier = Modifier.padding(12.dp).width(250.dp),
                         )
                         LazyRow(contentPadding = PaddingValues(horizontal = 16.dp)) {
                             items(4) { GridItemPlaceHolder(modifier=Modifier.width(88.dp), fillMaxWidth=true) }
@@ -724,9 +709,7 @@ fun HomeScreen(
                                 val albumWithSongs = withContext(Dispatchers.IO) {
                                     database.albumWithSongs(luckyItem.id).first()
                                 }
-                                albumWithSongs?.let {
-                                    playerConnection.playQueue(LocalAlbumRadio(it))
-                                }
+                                albumWithSongs?.let { playerConnection.playQueue(LocalAlbumRadio(it)) }
                             }
                             else -> {}
                         }
@@ -734,12 +717,8 @@ fun HomeScreen(
                         when (val luckyItem = allYtItems.random()) {
                             is SongItem -> playerConnection.playQueue(YouTubeQueue.radio(luckyItem.toMediaMetadata()))
                             is AlbumItem -> playerConnection.playQueue(YouTubeAlbumRadio(luckyItem.playlistId))
-                            is ArtistItem -> luckyItem.radioEndpoint?.let {
-                                playerConnection.playQueue(YouTubeQueue(it))
-                            }
-                            is PlaylistItem -> luckyItem.playEndpoint?.let {
-                                playerConnection.playQueue(YouTubeQueue(it))
-                            }
+                            is ArtistItem -> luckyItem.radioEndpoint?.let { playerConnection.playQueue(YouTubeQueue(it)) }
+                            is PlaylistItem -> luckyItem.playEndpoint?.let { playerConnection.playQueue(YouTubeQueue(it)) }
                         }
                     }
                 }
@@ -749,9 +728,7 @@ fun HomeScreen(
         Indicator(
             isRefreshing = isRefreshing,
             state = pullRefreshState,
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(LocalPlayerAwareWindowInsets.current.asPaddingValues()),
+            modifier = Modifier.align(Alignment.TopCenter).padding(LocalPlayerAwareWindowInsets.current.asPaddingValues()),
         )
     }
 }

@@ -24,26 +24,21 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Auto-fix Packages and Schemas
+      - name: Auto-fix lingering old package imports
         run: |
-          echo "1. Sweeping codebase for any missed package renames..."
-          find . -type f \( -name "*.kt" -o -name "*.xml" -o -name "*.kts" -o -name "*.json" \) -exec sed -i 's/com\.arturo254\.opentune/com.huayin.music/g' {} +
-          find . -type f \( -name "*.kt" -o -name "*.xml" -o -name "*.kts" -o -name "*.json" \) -exec sed -i 's/com\.arturo254/com.huayin/g' {} +
-          find . -type f \( -name "*.kts" \) -exec sed -i 's/com\.Arturo254\.opentune/com.huayin.music/g' {} +
-          
-          echo "2. Fixing Room Database Schema path..."
-          mkdir -p app/schemas/com.huayin.music.db.InternalDatabase
-          if [ -d "app/schemas/com.arturo254.opentune.db.InternalDatabase" ]; then
-            cp -r app/schemas/com.arturo254.opentune.db.InternalDatabase/* app/schemas/com.huayin.music.db.InternalDatabase/ 2>/dev/null || true
-          fi
+          echo "Sweeping codebase for any missed package renames..."
+          find . -type f \( -name "*.kt" -o -name "*.xml" -o -name "*.kts" \) -exec sed -i 's/com\.arturo254\.opentune/com.huayin.music/g' {} +
+          find . -type f \( -name "*.kt" -o -name "*.xml" -o -name "*.kts" \) -exec sed -i 's/com\.arturo254/com.huayin/g' {} +
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Clean and Build Debug APK
+        # We run 'clean' to clear corrupted KSP caches
+        # We use --info so that if a Kotlin import is broken, it actually prints it in the GitHub Action logs
         run: |
           ./gradlew clean
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          ./gradlew assembleDebug --no-daemon --stacktrace --info
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4

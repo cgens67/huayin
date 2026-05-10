@@ -46,29 +46,11 @@ android {
                 keyAlias = keyAliasName
                 keyPassword = keyPasswordText
             } else {
-                // Generate a temporary signing key if no set key is provided
-                val tempKeystore = file("${layout.buildDirectory.get().asFile}/tmp/temp-release-key.jks")
-                if (!tempKeystore.exists()) {
-                    tempKeystore.parentFile.mkdirs()
-                    try {
-                        ProcessBuilder(
-                            "keytool", "-genkey", "-v",
-                            "-keystore", tempKeystore.absolutePath,
-                            "-alias", "tempAlias",
-                            "-keyalg", "RSA", "-keysize", "2048",
-                            "-validity", "10000",
-                            "-storepass", "tempPassword",
-                            "-keypass", "tempPassword",
-                            "-dname", "CN=Temp,O=Temp,C=US"
-                        ).start().waitFor()
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }
-                storeFile = tempKeystore
-                storePassword = "tempPassword"
-                keyAlias = "tempAlias"
-                keyPassword = "tempPassword"
+                // Fallback to the temporary, auto-generated debug keystore
+                storeFile = signingConfigs.getByName("debug").storeFile
+                storePassword = signingConfigs.getByName("debug").storePassword
+                keyAlias = signingConfigs.getByName("debug").keyAlias
+                keyPassword = signingConfigs.getByName("debug").keyPassword
             }
         }
     }
@@ -87,18 +69,7 @@ android {
             )
         }
         debug {
-            // Replicating the release build configuration to output a release APK
-            // instead of the debug version APK, even on standard runs.
-            isMinifyEnabled = true
-            isShrinkResources = true
-            isCrunchPngs = false
-            
-            signingConfig = signingConfigs.getByName("release")
-
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            applicationIdSuffix = ".debug"
         }
     }
 

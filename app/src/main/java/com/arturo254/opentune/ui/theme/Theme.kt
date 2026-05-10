@@ -1,4 +1,4 @@
-package com.arturo254.opentune.ui.theme
+package com.huayin.music.ui.theme
 
 import android.graphics.Bitmap
 import android.os.Build
@@ -20,17 +20,18 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.palette.graphics.Palette
-import com.arturo254.opentune.constants.PlayerBackgroundStyle
+import com.huayin.music.constants.PlayerBackgroundStyle
 import com.google.material.color.dynamiccolor.DynamicScheme
 import com.google.material.color.hct.Hct
 import com.google.material.color.scheme.SchemeTonalSpot
 import com.google.material.color.score.Score
 
-val DefaultThemeColor = Color(0xFF4285F4)
+// Change the default to a patriotic China Red
+val DefaultThemeColor = Color(0xFFE51C23)
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun OpenTuneTheme(
+fun HuaYinTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     pureBlack: Boolean = false,
     expressive: Boolean = true,
@@ -85,7 +86,7 @@ fun Bitmap.extractGradientColors(): List<Color> {
         .swatches
         .associate { it.rgb to it.population }
 
-    val orderedColors = Score.score(extractedColors, 2, 0xFF4285F4.toInt(), true)
+    val orderedColors = Score.score(extractedColors, 2, 0xFFE51C23.toInt(), true)
         .sortedByDescending { Color(it).luminance() }
 
     return if (orderedColors.size >= 2)

@@ -1,9 +1,8 @@
 name: Build APK
 
-# This triggers the workflow whenever you push a commit to any branch
 on:
   push:
-    branches: [ "**" ]
+    branches:[ "**" ]
   pull_request:
     branches: [ "**" ]
 
@@ -16,25 +15,43 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          submodules: recursive # Fetches submodules if you have any
+          submodules: recursive
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: '21' # The app uses Java 21 as defined in your build.gradle.kts
+          java-version: '21'
           distribution: 'temurin'
           cache: gradle
+
+      - name: Auto-fix Packages and Schemas
+        run: |
+          echo "1. Sweeping codebase for any missed package renames..."
+          find . -type f \( -name "*.kt" -o -name "*.xml" -o -name "*.kts" -o -name "*.json" \) -exec sed -i 's/com\.arturo254\.opentune/com.huayin.music/g' {} +
+          find . -type f \( -name "*.kt" -o -name "*.xml" -o -name "*.kts" -o -name "*.json" \) -exec sed -i 's/com\.arturo254/com.huayin/g' {} +
+          find . -type f \( -name "*.kts" \) -exec sed -i 's/com\.Arturo254\.opentune/com.huayin.music/g' {} +
+          
+          echo "2. Fixing Room Database Schema path..."
+          # KSP requires the schema folder to perfectly match the fully qualified name of the Database class.
+          # If it doesn't match, AutoMigrations will crash the compiler with 'MissingType'.
+          mkdir -p app/schemas/com.huayin.music.db.InternalDatabase
+          if[ -d "app/schemas/com.arturo254.opentune.db.InternalDatabase" ]; then
+            cp -r app/schemas/com.arturo254.opentune.db.InternalDatabase/* app/schemas/com.huayin.music.db.InternalDatabase/ 2>/dev/null || true
+          fi
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build Debug APK
-        # We build the debug APK because it doesn't require setting up release signing keys.
-        run: ./gradlew assembleDebug --no-daemon
+      - name: Clean and Build Debug APK
+        # Run 'clean' to wipe the corrupted KSP cache from the previous failed run
+        run: |
+          ./gradlew clean
+          ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
+        if: success()
         with:
           name: HuaYin-Debug-APK
           path: app/build/outputs/apk/debug/app-debug.apk
-          retention-days: 7 # The APK will be available to download for 7 days
+          retention-days: 7

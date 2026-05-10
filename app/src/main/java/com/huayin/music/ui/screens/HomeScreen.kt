@@ -2,9 +2,8 @@ package com.huayin.music.ui.screens
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -17,7 +16,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -73,7 +71,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import coil.compose.AsyncImage
-import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.huayin.music.LocalDatabase
 import com.huayin.music.LocalPlayerAwareWindowInsets
@@ -131,6 +128,12 @@ private fun CompactLocalItem(
     onNavigate: () -> Unit,
     onMenuShow: () -> Unit
 ) {
+    val overlayAlpha by animateFloatAsState(
+        targetValue = if (isActive) 1f else 0f,
+        animationSpec = tween(300),
+        label = "overlayAlpha"
+    )
+
     Column(
         verticalArrangement = Arrangement.Top,
         modifier = Modifier
@@ -150,15 +153,15 @@ private fun CompactLocalItem(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
-            AnimatedVisibility(visible = isActive) {
+            if (overlayAlpha > 0f) {
                 Box(
-                    modifier = Modifier.fillMaxSize().background(Color.Black.copy(0.4f)),
+                    modifier = Modifier.fillMaxSize().background(Color.Black.copy(0.4f * overlayAlpha)),
                     contentAlignment = Alignment.Center
                 ){
                     Icon(
                         painterResource(if (isPlaying) R.drawable.pause else R.drawable.play),
                         null,
-                        tint = Color.White
+                        tint = Color.White.copy(alpha = overlayAlpha)
                     )
                 }
             }
@@ -182,6 +185,12 @@ private fun CompactYTGridItem(
     onNavigate: () -> Unit,
     onMenuShow: () -> Unit
 ) {
+    val overlayAlpha by animateFloatAsState(
+        targetValue = if (isActive) 1f else 0f,
+        animationSpec = tween(300),
+        label = "overlayAlpha"
+    )
+
     Column(
         modifier = Modifier
             .width(96.dp)
@@ -200,15 +209,15 @@ private fun CompactYTGridItem(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
-            AnimatedVisibility(visible = isActive) {
+            if (overlayAlpha > 0f) {
                 Box(
-                    modifier = Modifier.fillMaxSize().background(Color.Black.copy(0.4f)),
+                    modifier = Modifier.fillMaxSize().background(Color.Black.copy(0.4f * overlayAlpha)),
                     contentAlignment = Alignment.Center
                 ){
                     Icon(
                         painterResource(if (isPlaying) R.drawable.pause else R.drawable.play),
                         null,
-                        tint = Color.White
+                        tint = Color.White.copy(alpha = overlayAlpha)
                     )
                 }
             }
@@ -324,8 +333,7 @@ fun HomeScreen(
             quickPicks?.takeIf { it.isNotEmpty() }?.let { quickPicksList ->
                 item {
                     NavigationTitle(
-                        title = "即选发现灵感库",
-                        label = "每日优选推荐",
+                        title = "即选发现灵感库 (发现选点)",
                         modifier = Modifier.animateItem()
                     )
                 }
@@ -336,8 +344,7 @@ fun HomeScreen(
                         state = carouselState,
                         preferredItemWidth = 320.dp,
                         itemSpacing = 12.dp,
-                        contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal)
-                                .add(WindowInsets(left = 16.dp, right = 16.dp)).asPaddingValues(),
+                        contentPadding = PaddingValues(horizontal = 16.dp),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(400.dp) // Massive edge-to-edge feel
@@ -396,21 +403,22 @@ fun HomeScreen(
                                 )
 
                                 // Active/Playing Overlay
-                                AnimatedVisibility(
-                                    visible = isActive,
-                                    modifier = Modifier.matchParentSize(),
-                                    enter = fadeIn(), exit = fadeOut()
-                                ) {
+                                val overlayAlpha by animateFloatAsState(
+                                    targetValue = if (isActive) 1f else 0f,
+                                    animationSpec = tween(300),
+                                    label = "overlayAlpha"
+                                )
+                                if (overlayAlpha > 0f) {
                                     Box(
                                         modifier = Modifier
                                             .fillMaxSize()
-                                            .background(Color.Black.copy(alpha = 0.4f)),
+                                            .background(Color.Black.copy(alpha = 0.4f * overlayAlpha)),
                                         contentAlignment = Alignment.Center
                                     ) {
                                         Icon(
                                             painterResource(if (isPlaying) R.drawable.pause else R.drawable.play),
                                             contentDescription = null,
-                                            tint = Color.White,
+                                            tint = Color.White.copy(alpha = overlayAlpha),
                                             modifier = Modifier.size(64.dp)
                                         )
                                     }
@@ -498,7 +506,7 @@ fun HomeScreen(
                             if (url != null) {
                                 AsyncImage(
                                     model = ImageRequest.Builder(LocalContext.current)
-                                        .data(url).crossfade(true).build(),
+                                        .data(url).build(),
                                     placeholder = painterResource(id = R.drawable.person),
                                     error = painterResource(id = R.drawable.person),
                                     contentDescription = null,

@@ -51,6 +51,9 @@ fun NavGraphBuilder.navigationBuilder(
     composable("welcome") {
         WelcomeScreen(navController)
     }
+    composable("privacy_policy") {
+        PrivacyPolicyScreen(navController, scrollBehavior)
+    }
     composable(Screens.Home.route) {
         HomeScreen(navController)
     }

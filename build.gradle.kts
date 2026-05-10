@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.compose.compiler) apply false
 }
 
-    buildscript {
+buildscript {
     repositories {
         google()
         mavenCentral()
@@ -17,6 +17,9 @@ plugins {
         classpath(kotlin("gradle-plugin", libs.versions.kotlin.get()))
     }
 }
+
+// Make Release the default build when running gradle without tasks in CI
+defaultTasks("assembleRelease")
 
 tasks.register<Delete>("Clean") {
     delete(rootProject.layout.buildDirectory)

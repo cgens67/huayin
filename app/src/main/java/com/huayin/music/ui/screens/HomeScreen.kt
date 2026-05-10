@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -43,8 +44,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
-import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -331,7 +330,7 @@ fun HomeScreen(
                 }
             }
 
-            // High impact Material3 Carousel serving rich big visual representation to draw emphasis quickly
+            // Quick Picks - Tall Card LazyRow (Replaced M3 Carousel for strict corner radius and more visible items)
             quickPicks?.takeIf { it.isNotEmpty() }?.let { quickPicksList ->
                 item {
                     NavigationTitle(
@@ -341,114 +340,112 @@ fun HomeScreen(
                 }
 
                 item {
-                    val carouselState = rememberCarouselState { quickPicksList.size }
-                    HorizontalMultiBrowseCarousel(
-                        state = carouselState,
-                        preferredItemWidth = 160.dp,
-                        itemSpacing = 8.dp,
-                        contentPadding = PaddingValues(horizontal = 16.dp),
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal)
+                            .add(WindowInsets(left = 16.dp, right = 16.dp)).asPaddingValues(),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(200.dp)
                             .animateItem()
-                    ) { index ->
-                        val originalSong = quickPicksList[index]
-                        val song by database.song(originalSong.id).collectAsState(initial = originalSong)
-                        val isActive = song!!.id == mediaMetadata?.id
+                    ) {
+                        items(quickPicksList) { originalSong ->
+                            val song by database.song(originalSong.id).collectAsState(initial = originalSong)
+                            val isActive = song!!.id == mediaMetadata?.id
 
-                        Card(
-                            modifier = Modifier
-                                .maskClip(RoundedCornerShape(24.dp))
-                                .fillMaxSize()
-                                .combinedClickable(
-                                    onClick = {
-                                        if (isActive) playerConnection.player.togglePlayPause()
-                                        else playerConnection.playQueue(YouTubeQueue.radio(song!!.toMediaMetadata()))
-                                    },
-                                    onLongClick = {
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        menuState.show {
-                                            SongMenu(
-                                                originalSong = song!!,
-                                                navController = navController,
-                                                onDismiss = menuState::dismiss
+                            Card(
+                                modifier = Modifier
+                                    .width(140.dp)
+                                    .height(240.dp)
+                                    .combinedClickable(
+                                        onClick = {
+                                            if (isActive) playerConnection.player.togglePlayPause()
+                                            else playerConnection.playQueue(YouTubeQueue.radio(song!!.toMediaMetadata()))
+                                        },
+                                        onLongClick = {
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            menuState.show {
+                                                SongMenu(
+                                                    originalSong = song!!,
+                                                    navController = navController,
+                                                    onDismiss = menuState::dismiss
+                                                )
+                                            }
+                                        }
+                                    ),
+                                shape = RoundedCornerShape(24.dp),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                            ) {
+                                Box(modifier = Modifier.fillMaxSize()) {
+                                    // Full Cover Background
+                                    AsyncImage(
+                                        model = song!!.song.thumbnailUrl,
+                                        contentDescription = null,
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+
+                                    // Gradient Scrim for readable text
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .fillMaxHeight(0.6f)
+                                            .align(Alignment.BottomCenter)
+                                            .background(
+                                                Brush.verticalGradient(
+                                                    colors = listOf(
+                                                        Color.Transparent,
+                                                        Color.Black.copy(alpha = 0.6f),
+                                                        Color.Black.copy(alpha = 0.9f)
+                                                    )
+                                                )
+                                            )
+                                    )
+
+                                    // Active/Playing Overlay
+                                    val overlayAlpha by animateFloatAsState(
+                                        targetValue = if (isActive) 1f else 0f,
+                                        animationSpec = tween(300),
+                                        label = "overlayAlpha"
+                                    )
+                                    if (overlayAlpha > 0f) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .background(Color.Black.copy(alpha = 0.4f * overlayAlpha)),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                painterResource(if (isPlaying) R.drawable.pause else R.drawable.play),
+                                                contentDescription = null,
+                                                tint = Color.White.copy(alpha = overlayAlpha),
+                                                modifier = Modifier.size(48.dp)
                                             )
                                         }
                                     }
-                                ),
-                            shape = RoundedCornerShape(24.dp), // Safe fallback shape
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                        ) {
-                            Box(modifier = Modifier.fillMaxSize()) {
-                                // Full Cover Background
-                                AsyncImage(
-                                    model = song!!.song.thumbnailUrl,
-                                    contentDescription = null,
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier.fillMaxSize()
-                                )
 
-                                // Gradient Scrim for readable text
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .fillMaxHeight(0.7f)
-                                        .align(Alignment.BottomCenter)
-                                        .background(
-                                            Brush.verticalGradient(
-                                                colors = listOf(
-                                                    Color.Transparent,
-                                                    Color.Black.copy(alpha = 0.6f),
-                                                    Color.Black.copy(alpha = 0.9f)
-                                                )
-                                            )
-                                        )
-                                )
-
-                                // Active/Playing Overlay
-                                val overlayAlpha by animateFloatAsState(
-                                    targetValue = if (isActive) 1f else 0f,
-                                    animationSpec = tween(300),
-                                    label = "overlayAlpha"
-                                )
-                                if (overlayAlpha > 0f) {
-                                    Box(
+                                    // Overlaid Content Details
+                                    Column(
                                         modifier = Modifier
-                                            .fillMaxSize()
-                                            .background(Color.Black.copy(alpha = 0.4f * overlayAlpha)),
-                                        contentAlignment = Alignment.Center
+                                            .align(Alignment.BottomStart)
+                                            .fillMaxWidth()
+                                            .padding(16.dp)
                                     ) {
-                                        Icon(
-                                            painterResource(if (isPlaying) R.drawable.pause else R.drawable.play),
-                                            contentDescription = null,
-                                            tint = Color.White.copy(alpha = overlayAlpha),
-                                            modifier = Modifier.size(48.dp)
+                                        Text(
+                                            text = song!!.song.title,
+                                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black),
+                                            color = Color.White,
+                                            maxLines = 2,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = song!!.artists.joinToString { it.name },
+                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
+                                            color = Color.White.copy(alpha = 0.85f),
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
                                         )
                                     }
-                                }
-
-                                // Overlaid Content Details
-                                Column(
-                                    modifier = Modifier
-                                        .align(Alignment.BottomStart)
-                                        .fillMaxWidth()
-                                        .padding(12.dp)
-                                ) {
-                                    Text(
-                                        text = song!!.song.title,
-                                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black),
-                                        color = Color.White,
-                                        maxLines = 2,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
-                                        text = song!!.artists.joinToString { it.name },
-                                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
-                                        color = Color.White.copy(alpha = 0.85f),
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
                                 }
                             }
                         }
@@ -464,7 +461,8 @@ fun HomeScreen(
                 item {
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal)
+                            .add(WindowInsets(left = 16.dp, right = 16.dp)).asPaddingValues(),
                         modifier = Modifier.animateItem()
                     ) {
                         items(keepList) { litem ->
@@ -525,7 +523,8 @@ fun HomeScreen(
                 item {
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = PaddingValues(horizontal = 16.dp)
+                        contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal)
+                            .add(WindowInsets(left = 16.dp, right = 16.dp)).asPaddingValues()
                     ) {
                         items(accountPlists) {
                             CompactYTGridItem(
@@ -563,7 +562,8 @@ fun HomeScreen(
                 item {
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = PaddingValues(horizontal = 16.dp)
+                        contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal)
+                            .add(WindowInsets(left = 16.dp, right = 16.dp)).asPaddingValues()
                     ) {
                         items(similarData.items) { yi ->
                             CompactYTGridItem(
@@ -604,7 +604,8 @@ fun HomeScreen(
                 item {
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = PaddingValues(horizontal = 16.dp)
+                        contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal)
+                            .add(WindowInsets(left = 16.dp, right = 16.dp)).asPaddingValues()
                     ) {
                         items(sectionInfo.items) { itemVal ->
                             CompactYTGridItem(
@@ -640,7 +641,8 @@ fun HomeScreen(
                 item {
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = PaddingValues(horizontal = 16.dp)
+                        contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal)
+                            .add(WindowInsets(left = 16.dp, right = 16.dp)).asPaddingValues()
                     ) {
                         items(newR) { al->
                             CompactYTGridItem(
@@ -660,7 +662,8 @@ fun HomeScreen(
                 item {
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = PaddingValues(horizontal = 16.dp)
+                        contentPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal)
+                            .add(WindowInsets(left = 16.dp, right = 16.dp)).asPaddingValues()
                     ) {
                         items(favList){ flocal ->
                             val sval by database.song(flocal.id).collectAsState(initial = flocal)

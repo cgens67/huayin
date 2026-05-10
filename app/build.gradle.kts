@@ -11,16 +11,16 @@ plugins {
 }
 
 android {
-    namespace = "com.arturo254.opentune"
+    namespace = "com.huayin.music"
     //noinspection GradleDependency
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.Arturo254.opentune"
+        applicationId = "com.huayin.music"
         minSdk = 24
         targetSdk = 35
-        versionCode = 126
-        versionName = "2.0.12"
+        versionCode = 1
+        versionName = "1.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -34,9 +34,7 @@ android {
             }
         }
 
-        // [新增] Release 簽名設定
         create("release") {
-            // 檢查環境變數是否存在 (GitHub Actions 會提供這些)
             val keystorePath = System.getenv("APP_RELEASE_STORE_FILE")
             val keystorePassword = System.getenv("APP_RELEASE_STORE_PASSWORD")
             val keyAliasName = System.getenv("APP_RELEASE_KEY_ALIAS")
@@ -57,7 +55,6 @@ android {
             isShrinkResources = true
             isCrunchPngs = false
 
-            // [新增] 套用上面定義的 release 簽名設定
             signingConfig = signingConfigs.getByName("release")
 
             proguardFiles(
@@ -86,7 +83,6 @@ android {
         compose = true
     }
 
-    // ✅ Alineamos TODO a Java 21
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_21

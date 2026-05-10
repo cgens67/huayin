@@ -227,7 +227,6 @@ import java.net.URL
 import java.net.URLDecoder
 import java.net.URLEncoder
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.days
 
 @Suppress("DEPRECATION", "ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
 @AndroidEntryPoint
@@ -329,7 +328,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             LaunchedEffect(Unit) {
-                if (System.currentTimeMillis() - Updater.lastCheckTime > 1.days.inWholeMilliseconds) {
+                if (System.currentTimeMillis() - Updater.lastCheckTime > 24 * 60 * 60 * 1000L) {
                     Updater.getLatestVersionName().onSuccess {
                         latestVersionName = it
                     }

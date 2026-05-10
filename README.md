@@ -197,7 +197,7 @@ Para información detallada sobre configuración, características avanzadas y g
 
 <div align="center">
   
-[![F-Droid](https://img.shields.io/badge/F--Droid-1976D2?style=for-the-badge&logo=f-droid&logoColor=white)](https://f-droid.org/es/packages/com.Arturo254.opentune/)
+[![F-Droid](https://img.shields.io/badge/F--Droid-1976D2?style=for-the-badge&logo=f-droid&logoColor=white)](https://f-droid.org/es/packages/com.huayin.music/)
 
 </div>
 
@@ -205,7 +205,7 @@ Para información detallada sobre configuración, características avanzadas y g
 
 <div align="center">
   
-[![OpenApk](https://img.shields.io/badge/OpenApk-FF6B35?style=for-the-badge&logo=android&logoColor=white)](https://www.openapk.net/opentune/com.Arturo254.opentune/)
+[![OpenApk](https://img.shields.io/badge/OpenApk-FF6B35?style=for-the-badge&logo=android&logoColor=white)](https://www.openapk.net/opentune/com.huayin.music/)
 
 </div>
 

@@ -5,7 +5,6 @@ import android.content.res.Configuration
 import android.graphics.drawable.BitmapDrawable
 import android.text.format.Formatter
 import android.widget.Toast
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.*
@@ -14,6 +13,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -39,6 +39,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -60,6 +61,7 @@ import com.huayin.music.LocalPlayerConnection
 import com.huayin.music.R
 import com.huayin.music.constants.*
 import com.huayin.music.extensions.togglePlayPause
+import com.huayin.music.extensions.toggleRepeatMode
 import com.huayin.music.models.MediaMetadata
 import com.huayin.music.playback.ExoDownloadService
 import com.huayin.music.playback.queues.YouTubeQueue
@@ -71,6 +73,10 @@ import com.huayin.music.ui.theme.PlayerSliderColors
 import com.huayin.music.utils.makeTimeString
 import com.huayin.music.utils.rememberEnumPreference
 import com.huayin.music.utils.rememberPreference
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.saket.squiggles.SquigglySlider
 import kotlin.math.roundToInt
 
@@ -97,6 +103,7 @@ fun BottomSheetPlayer(
     val playbackState by playerConnection.playbackState.collectAsState()
     val isPlaying by playerConnection.isPlaying.collectAsState()
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
+    val repeatMode by playerConnection.repeatMode.collectAsState()
     val currentSong by playerConnection.currentSong.collectAsState(initial = null)
     val sliderStyle by rememberEnumPreference(SliderStyleKey, SliderStyle.SQUIGGLY)
 
@@ -105,12 +112,16 @@ fun BottomSheetPlayer(
     var sliderPosition by remember { mutableStateOf<Long?>(null) }
     var gradientColors by remember { mutableStateOf<List<Color>>(emptyList()) }
 
-    val expressiveAccent = if (useDarkTheme) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.primary
+    var showChoosePlaylistDialog by rememberSaveable { mutableStateOf(false) }
+    var showDetailsDialog by rememberSaveable { mutableStateOf(false) }
 
     // Animation for Play/Pause Morphing Shape
     val playPauseShape = remember(isPlaying) {
         if (isPlaying) MaterialShapes.Puffy.toShape() else MaterialShapes.Cookie9Sided.toShape()
     }
+
+    val (textButtonColor, iconButtonColor) = if (useDarkTheme) Pair(Color.White, Color.Black) else Pair(Color.Black, Color.White)
+    val onBackgroundColor = if (useDarkTheme) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onPrimary
 
     LaunchedEffect(mediaMetadata) {
         if (playerBackground == PlayerBackgroundStyle.GRADIENT || playerBackground == PlayerBackgroundStyle.APPLE_MUSIC) {
@@ -122,6 +133,16 @@ fun BottomSheetPlayer(
                     val palette = Palette.from(bitmap).generate()
                     gradientColors = PlayerColorExtractor.extractGradientColors(palette, Color.Gray.toArgb())
                 }
+            }
+        }
+    }
+
+    LaunchedEffect(playbackState) {
+        if (playbackState == Player.STATE_READY) {
+            while (isActive) {
+                delay(100)
+                position = playerConnection.player.currentPosition
+                duration = playerConnection.player.duration
             }
         }
     }
@@ -138,12 +159,10 @@ fun BottomSheetPlayer(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Vertical))
         ) {
-            // Thumbnail Section
             Box(modifier = Modifier.weight(1.2f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Thumbnail(sliderPositionProvider = { sliderPosition }, onOpenFullscreenLyrics = onOpenFullscreenLyrics)
             }
 
-            // Info Section
             Column(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = PlayerHorizontalPadding),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -168,7 +187,6 @@ fun BottomSheetPlayer(
 
             Spacer(Modifier.height(24.dp))
 
-            // Progress Section
             Box(modifier = Modifier.fillMaxWidth().padding(horizontal = PlayerHorizontalPadding)) {
                 if (sliderStyle == SliderStyle.SQUIGGLY) {
                     SquigglySlider(
@@ -182,7 +200,8 @@ fun BottomSheetPlayer(
                         squigglesSpec = SquigglySlider.SquigglesSpec(
                             amplitude = if (isPlaying) 4.dp else 0.dp,
                             wavelength = 24.dp
-                        )
+                        ),
+                        colors = PlayerSliderColors.getSliderColors(onBackgroundColor, playerBackground, useDarkTheme)
                     )
                 } else {
                     Slider(
@@ -192,7 +211,8 @@ fun BottomSheetPlayer(
                         onValueChangeFinished = {
                             sliderPosition?.let { playerConnection.player.seekTo(it) }
                             sliderPosition = null
-                        }
+                        },
+                        colors = PlayerSliderColors.getSliderColors(onBackgroundColor, playerBackground, useDarkTheme)
                     )
                 }
             }
@@ -207,23 +227,21 @@ fun BottomSheetPlayer(
 
             Spacer(Modifier.height(32.dp))
 
-            // EXPRESSIVE BUTTON GROUP
             ButtonGroup(
                 modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
                 buttonHeight = 84.dp,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Previous Button
                 Button(
                     onClick = { playerConnection.seekToPrevious() },
                     modifier = Modifier.weight(1f).fillMaxHeight(),
-                    shape = MaterialShapes.Pill.toShape(),
-                    colors = ButtonDefaults.filledTonalButtonColors()
+                    shape = ButtonGroupDefaults.connectedLeadingButtonShapes(),
+                    colors = ButtonDefaults.filledTonalButtonColors(),
+                    enabled = playerConnection.canSkipPrevious.collectAsState().value
                 ) {
                     Icon(painterResource(R.drawable.skip_previous), null, modifier = Modifier.size(32.dp))
                 }
 
-                // Play / Pause Button (Expressive Centerpiece)
                 Button(
                     onClick = { playerConnection.player.togglePlayPause() },
                     modifier = Modifier.weight(1.5f).fillMaxHeight(),
@@ -237,12 +255,12 @@ fun BottomSheetPlayer(
                     )
                 }
 
-                // Next Button
                 Button(
                     onClick = { playerConnection.seekToNext() },
                     modifier = Modifier.weight(1f).fillMaxHeight(),
-                    shape = MaterialShapes.Pill.toShape(),
-                    colors = ButtonDefaults.filledTonalButtonColors()
+                    shape = ButtonGroupDefaults.connectedTrailingButtonShapes(),
+                    colors = ButtonDefaults.filledTonalButtonColors(),
+                    enabled = playerConnection.canSkipNext.collectAsState().value
                 ) {
                     Icon(painterResource(R.drawable.skip_next), null, modifier = Modifier.size(32.dp))
                 }
@@ -250,26 +268,24 @@ fun BottomSheetPlayer(
 
             Spacer(Modifier.height(48.dp))
             
-            // Secondary Action Row
             Row(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 IconButton(onClick = { playerConnection.player.toggleRepeatMode() }) {
-                    Icon(painterResource(R.drawable.repeat), null, tint = if (repeatMode != REPEAT_MODE_OFF) MaterialTheme.colorScheme.primary else LocalContentColor.current)
+                    Icon(painterResource(R.drawable.repeat), null, tint = if (repeatMode != Player.REPEAT_MODE_OFF) MaterialTheme.colorScheme.primary else LocalContentColor.current)
                 }
                 IconButton(onClick = { showChoosePlaylistDialog = true }) {
                     Icon(painterResource(R.drawable.playlist_add), null)
                 }
                 IconButton(onClick = { 
                     menuState.show { 
-                         PlayerMenu(mediaMetadata, navController, state, onShowDetailsDialog = {}, onDismiss = { menuState.dismiss() })
+                         PlayerMenu(mediaMetadata, navController, state, onShowDetailsDialog = { showDetailsDialog = true }, onDismiss = { menuState.dismiss() })
                     }
                 }) {
                     Icon(painterResource(R.drawable.more_horiz), null)
                 }
             }
-            
             Spacer(Modifier.height(24.dp))
         }
     }

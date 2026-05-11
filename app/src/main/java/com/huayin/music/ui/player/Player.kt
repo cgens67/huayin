@@ -110,6 +110,10 @@ fun BottomSheetPlayer(
     BottomSheet(
         state = state,
         modifier = modifier,
+        onDismiss = {
+            playerConnection.player.stop()
+            playerConnection.player.clearMediaItems()
+        },
         background = {
             Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface))
         },

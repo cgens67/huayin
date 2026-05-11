@@ -44,6 +44,7 @@ fun SettingsScreen(
             .verticalScroll(rememberScrollState())
             .background(MaterialTheme.colorScheme.surface)
     ) {
+        Spacer(Modifier.windowInsetsPadding(LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Top)))
         Spacer(Modifier.height(16.dp))
 
         ElevatedCard(

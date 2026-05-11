@@ -6,7 +6,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.huayin.music.R
@@ -15,7 +14,7 @@ import com.huayin.music.ui.component.*
 import com.huayin.music.utils.rememberEnumPreference
 import com.huayin.music.utils.rememberPreference
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppearanceSettings(
     navController: NavController,
@@ -26,7 +25,6 @@ fun AppearanceSettings(
     val (pureBlack, onPureBlackChange) = rememberPreference(PureBlackKey, false)
     val (sliderStyle, onSliderStyleChange) = rememberEnumPreference(SliderStyleKey, SliderStyle.SQUIGGLY)
     
-    // Shape State Collection (Fixed from previous turn)
     val smallButtonsShape by rememberPreference(SmallButtonsShapeKey, DefaultSmallButtonsShape)
     val miniPlayerShape by rememberPreference(MiniPlayerThumbnailShapeKey, DefaultMiniPlayerThumbnailShape)
 
@@ -73,8 +71,8 @@ fun AppearanceSettings(
                 { UnifiedShapeSelectorButton(
                     smallButtonsShape = smallButtonsShape,
                     miniPlayerShape = miniPlayerShape,
-                    onSmallButtonsShapeSelected = { /* Logic to save via DataStore */ },
-                    onMiniPlayerShapeSelected = { /* Logic to save via DataStore */ }
+                    onSmallButtonsShapeSelected = { /* Logic */ },
+                    onMiniPlayerShapeSelected = { /* Logic */ }
                 )},
                 { EnumListPreference(
                     title = { Text("Seek Bar Style") },
@@ -83,11 +81,10 @@ fun AppearanceSettings(
                     onValueSelected = onSliderStyleChange,
                     valueText = { it.name.lowercase().capitalize() }
                 )},
-                { ThumbnailCornerRadiusSelectorButton { /* Logic to save */ } }
+                { ThumbnailCornerRadiusSelectorButton { /* Logic */ } }
             )
         )
 
-        // Language & Avatars at the bottom
         SettingsGeneralCategory(
             title = "Personalization",
             items = listOf(
@@ -98,3 +95,9 @@ fun AppearanceSettings(
         AvatarSelector(modifier = Modifier.padding(16.dp))
     }
 }
+
+// RESTORING MISSING ENUMS TO PREVENT COMPILER CRASHES
+enum class DarkMode { ON, OFF, AUTO }
+enum class NavigationTab { HOME, EXPLORE, LIBRARY }
+enum class LyricsPosition { LEFT, CENTER, RIGHT }
+enum class PlayerTextAlignment { SIDED, CENTER }

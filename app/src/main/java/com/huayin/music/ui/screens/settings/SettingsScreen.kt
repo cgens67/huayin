@@ -2,10 +2,8 @@ package com.huayin.music.ui.screens.settings
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -13,11 +11,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -36,7 +34,6 @@ fun SettingsScreen(
     navController: NavController,
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
-    val context = LocalContext.current
     val accountName by rememberPreference(AccountNameKey, "")
     val innerTubeCookie by rememberPreference(InnerTubeCookieKey, "")
     val isLoggedIn = innerTubeCookie.contains("SAPISID")
@@ -50,7 +47,6 @@ fun SettingsScreen(
     ) {
         Spacer(Modifier.height(16.dp))
 
-        // Expressive Profile Header
         ElevatedCard(
             modifier = Modifier.padding(16.dp).fillMaxWidth(),
             shape = RoundedCornerShape(32.dp),
@@ -86,7 +82,6 @@ fun SettingsScreen(
 
                 Spacer(Modifier.height(24.dp))
 
-                // BUTTON GROUP for Account Actions
                 ButtonGroup(modifier = Modifier.fillMaxWidth()) {
                     Button(
                         onClick = { if (!isLoggedIn) navController.navigate("login") },
@@ -98,7 +93,7 @@ fun SettingsScreen(
                     
                     if (isLoggedIn) {
                         OutlinedButton(
-                            onClick = { /* Handle logout */ },
+                            onClick = { /* Logout logic */ },
                             modifier = Modifier.weight(1f),
                             shape = ButtonGroupDefaults.connectedTrailingButtonShapes()
                         ) {
@@ -109,7 +104,6 @@ fun SettingsScreen(
             }
         }
 
-        // Settings Categories
         SettingsCategory(
             title = stringResource(R.string.general_settings),
             items = listOf(
@@ -139,18 +133,18 @@ fun SettingsScreen(
                 SettingsCategoryItem(
                     icon = painterResource(R.drawable.schedule),
                     title = { Text(stringResource(R.string.Changelog)) },
-                    onClick = { /* show changelog */ }
+                    onClick = { /* Changelog logic */ }
                 ),
                 SettingsCategoryItem(
                     icon = painterResource(R.drawable.paypal),
                     title = { Text(stringResource(R.string.Donate)) },
                     isHighlighted = true,
-                    onClick = { /* uri open */ }
+                    onClick = { /* Donation logic */ }
                 )
             )
         )
         
-        Spacer(Modifier.height(100.dp)) // Extra space for FAB/Player
+        Spacer(Modifier.height(100.dp))
     }
 
     TopAppBar(

@@ -20,8 +20,8 @@ import com.huayin.music.R
 data class SettingsCategoryItem(
     val icon: Painter? = null,
     val title: @Composable () -> Unit,
-    val description: @Composable (() -> Unit)? = null, // Changed to Composable to support flexible text
-    val trailingContent: @Composable (() -> Unit)? = null,
+    val description: (@Composable () -> Unit)? = null,
+    val trailingContent: (@Composable () -> Unit)? = null,
     val showBadge: Boolean = false,
     val isHighlighted: Boolean = false,
     val onClick: (() -> Unit)? = null

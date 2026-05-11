@@ -86,7 +86,7 @@ fun SettingsScreen(
                     Button(
                         onClick = { if (!isLoggedIn) navController.navigate("login") },
                         modifier = Modifier.weight(1f),
-                        shape = ButtonGroupDefaults.connectedLeadingButtonShapes()
+                        shape = ButtonGroupDefaults.connectedLeadingButtonShapes().shape
                     ) {
                         Text(if (isLoggedIn) stringResource(R.string.account) else stringResource(R.string.action_login))
                     }
@@ -95,7 +95,7 @@ fun SettingsScreen(
                         OutlinedButton(
                             onClick = { /* Logout logic */ },
                             modifier = Modifier.weight(1f),
-                            shape = ButtonGroupDefaults.connectedTrailingButtonShapes()
+                            shape = ButtonGroupDefaults.connectedTrailingButtonShapes().shape
                         ) {
                             Text(stringResource(R.string.logout))
                         }

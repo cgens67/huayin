@@ -105,6 +105,10 @@ fun BottomSheetPlayer(
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
     val repeatMode by playerConnection.repeatMode.collectAsState()
     val sliderStyle by rememberEnumPreference(SliderStyleKey, SliderStyle.SQUIGGLY)
+    
+    // Fix: Collect Skip States at top level to avoid scope errors
+    val canSkipPrev by playerConnection.canSkipPrevious.collectAsState()
+    val canSkipNext by playerConnection.canSkipNext.collectAsState()
 
     var position by rememberSaveable(playbackState) { mutableLongStateOf(playerConnection.player.currentPosition) }
     var duration by rememberSaveable(playbackState) { mutableLongStateOf(playerConnection.player.duration) }
@@ -114,7 +118,6 @@ fun BottomSheetPlayer(
     var showChoosePlaylistDialog by rememberSaveable { mutableStateOf(false) }
     var showDetailsDialog by rememberSaveable { mutableStateOf(false) }
 
-    // Fix: Move color resource access out of Dispatchers.IO
     val fallbackColor = MaterialTheme.colorScheme.surface.toArgb()
 
     LaunchedEffect(mediaMetadata) {
@@ -224,9 +227,12 @@ fun BottomSheetPlayer(
 
             Spacer(Modifier.height(32.dp))
 
+            // Fix: Correct ButtonGroup parameters (Height via Modifier)
             ButtonGroup(
-                modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
-                buttonHeight = 84.dp,
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth()
+                    .height(84.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Button(
@@ -234,7 +240,7 @@ fun BottomSheetPlayer(
                     modifier = Modifier.weight(1f).fillMaxHeight(),
                     shape = ButtonGroupDefaults.connectedLeadingButtonShapes().shape,
                     colors = ButtonDefaults.filledTonalButtonColors(),
-                    enabled = playerConnection.canSkipPrevious.collectAsState().value
+                    enabled = canSkipPrev
                 ) {
                     Icon(painterResource(R.drawable.skip_previous), null, modifier = Modifier.size(32.dp))
                 }
@@ -257,7 +263,7 @@ fun BottomSheetPlayer(
                     modifier = Modifier.weight(1f).fillMaxHeight(),
                     shape = ButtonGroupDefaults.connectedTrailingButtonShapes().shape,
                     colors = ButtonDefaults.filledTonalButtonColors(),
-                    enabled = playerConnection.canSkipNext.collectAsState().value
+                    enabled = canSkipNext
                 ) {
                     Icon(painterResource(R.drawable.skip_next), null, modifier = Modifier.size(32.dp))
                 }

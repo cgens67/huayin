@@ -13,7 +13,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -74,6 +73,7 @@ import com.huayin.music.utils.makeTimeString
 import com.huayin.music.utils.rememberEnumPreference
 import com.huayin.music.utils.rememberPreference
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -104,7 +104,6 @@ fun BottomSheetPlayer(
     val isPlaying by playerConnection.isPlaying.collectAsState()
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
     val repeatMode by playerConnection.repeatMode.collectAsState()
-    val currentSong by playerConnection.currentSong.collectAsState(initial = null)
     val sliderStyle by rememberEnumPreference(SliderStyleKey, SliderStyle.SQUIGGLY)
 
     var position by rememberSaveable(playbackState) { mutableLongStateOf(playerConnection.player.currentPosition) }
@@ -115,13 +114,8 @@ fun BottomSheetPlayer(
     var showChoosePlaylistDialog by rememberSaveable { mutableStateOf(false) }
     var showDetailsDialog by rememberSaveable { mutableStateOf(false) }
 
-    // Animation for Play/Pause Morphing Shape
-    val playPauseShape = remember(isPlaying) {
-        if (isPlaying) MaterialShapes.Puffy.toShape() else MaterialShapes.Cookie9Sided.toShape()
-    }
-
-    val (textButtonColor, iconButtonColor) = if (useDarkTheme) Pair(Color.White, Color.Black) else Pair(Color.Black, Color.White)
-    val onBackgroundColor = if (useDarkTheme) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onPrimary
+    // Fix: Move color resource access out of Dispatchers.IO
+    val fallbackColor = MaterialTheme.colorScheme.surface.toArgb()
 
     LaunchedEffect(mediaMetadata) {
         if (playerBackground == PlayerBackgroundStyle.GRADIENT || playerBackground == PlayerBackgroundStyle.APPLE_MUSIC) {
@@ -131,7 +125,7 @@ fun BottomSheetPlayer(
                 }.getOrNull()
                 result?.bitmap?.let { bitmap ->
                     val palette = Palette.from(bitmap).generate()
-                    gradientColors = PlayerColorExtractor.extractGradientColors(palette, Color.Gray.toArgb())
+                    gradientColors = PlayerColorExtractor.extractGradientColors(palette, fallbackColor)
                 }
             }
         }
@@ -146,6 +140,9 @@ fun BottomSheetPlayer(
             }
         }
     }
+
+    val playPauseShape = if (isPlaying) MaterialShapes.Puffy.toShape() else MaterialShapes.Cookie9Sided.toShape()
+    val onBackgroundColor = if (useDarkTheme) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onPrimary
 
     BottomSheet(
         state = state,
@@ -197,11 +194,11 @@ fun BottomSheetPlayer(
                             sliderPosition?.let { playerConnection.player.seekTo(it) }
                             sliderPosition = null
                         },
+                        colors = PlayerSliderColors.getSliderColors(onBackgroundColor, playerBackground, useDarkTheme),
                         squigglesSpec = SquigglySlider.SquigglesSpec(
                             amplitude = if (isPlaying) 4.dp else 0.dp,
                             wavelength = 24.dp
-                        ),
-                        colors = PlayerSliderColors.getSliderColors(onBackgroundColor, playerBackground, useDarkTheme)
+                        )
                     )
                 } else {
                     Slider(
@@ -235,7 +232,7 @@ fun BottomSheetPlayer(
                 Button(
                     onClick = { playerConnection.seekToPrevious() },
                     modifier = Modifier.weight(1f).fillMaxHeight(),
-                    shape = ButtonGroupDefaults.connectedLeadingButtonShapes(),
+                    shape = ButtonGroupDefaults.connectedLeadingButtonShapes().shape,
                     colors = ButtonDefaults.filledTonalButtonColors(),
                     enabled = playerConnection.canSkipPrevious.collectAsState().value
                 ) {
@@ -258,7 +255,7 @@ fun BottomSheetPlayer(
                 Button(
                     onClick = { playerConnection.seekToNext() },
                     modifier = Modifier.weight(1f).fillMaxHeight(),
-                    shape = ButtonGroupDefaults.connectedTrailingButtonShapes(),
+                    shape = ButtonGroupDefaults.connectedTrailingButtonShapes().shape,
                     colors = ButtonDefaults.filledTonalButtonColors(),
                     enabled = playerConnection.canSkipNext.collectAsState().value
                 ) {

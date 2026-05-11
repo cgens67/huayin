@@ -90,6 +90,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.os.ConfigurationCompat
 import androidx.core.os.LocaleListCompat
 import com.huayin.music.R
+import com.huayin.music.constants.LanguageCodeToName
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -141,37 +142,6 @@ class LocaleManager private constructor(private val context: Context) {
                 instance ?: LocaleManager(context.applicationContext).also { instance = it }
             }
         }
-
-        // Mapeo de banderas y estados de traducción
-        private val LANGUAGE_METADATA = mapOf(
-            "en" to LanguageMetadata("🇺🇸", CompletionStatus.COMPLETE),
-            "es" to LanguageMetadata("🇪🇸", CompletionStatus.COMPLETE),
-            "fr" to LanguageMetadata("🇫🇷", CompletionStatus.COMPLETE),
-            "de" to LanguageMetadata("🇩🇪", CompletionStatus.COMPLETE),
-            "it" to LanguageMetadata("🇮🇹", CompletionStatus.COMPLETE),
-            "pt-rBR" to LanguageMetadata("🇧🇷", CompletionStatus.COMPLETE),
-            "pt" to LanguageMetadata("🇵🇹", CompletionStatus.COMPLETE),
-            "ru" to LanguageMetadata("🇷🇺", CompletionStatus.COMPLETE),
-            "zh-rCN" to LanguageMetadata("🇨🇳", CompletionStatus.COMPLETE),
-            "zh-rTW" to LanguageMetadata("🇹🇼", CompletionStatus.COMPLETE),
-            "ja" to LanguageMetadata("🇯🇵", CompletionStatus.COMPLETE),
-            "ko" to LanguageMetadata("🇰🇷", CompletionStatus.COMPLETE),
-            "ar" to LanguageMetadata("🇸🇦", CompletionStatus.BETA),
-            "hi" to LanguageMetadata("🇮🇳", CompletionStatus.BETA),
-            "th" to LanguageMetadata("🇹🇭", CompletionStatus.INCOMPLETE),
-            "vi" to LanguageMetadata("🇻🇳", CompletionStatus.INCOMPLETE),
-            "tr" to LanguageMetadata("🇹🇷", CompletionStatus.BETA),
-            "pl" to LanguageMetadata("🇵🇱", CompletionStatus.INCOMPLETE),
-            "nl" to LanguageMetadata("🇳🇱", CompletionStatus.INCOMPLETE),
-            "id" to LanguageMetadata("🇮🇩", CompletionStatus.BETA),
-            "uk" to LanguageMetadata("🇺🇦", CompletionStatus.BETA),
-            "he" to LanguageMetadata("🇮🇱", CompletionStatus.BETA)
-        )
-
-        private data class LanguageMetadata(
-            val flag: String,
-            val completionStatus: CompletionStatus
-        )
     }
 
     private val sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
@@ -215,10 +185,6 @@ class LocaleManager private constructor(private val context: Context) {
         }
     }
 
-    private fun detectAvailableLanguages(): List<String> {
-        return LANGUAGE_METADATA.keys.toList()
-    }
-
     private fun formatLocaleCode(locale: Locale): String {
         val language = locale.language
         val country = locale.country
@@ -259,8 +225,6 @@ class LocaleManager private constructor(private val context: Context) {
     fun getAvailableLanguages(): List<LanguageItem> {
         return _cachedLanguages ?: run {
             val systemLanguageCode = getSystemLanguageCode()
-            val availableLocaleCodes = detectAvailableLanguages()
-
             val languages = mutableListOf<LanguageItem>()
 
             // Agregar opción de sistema
@@ -275,45 +239,34 @@ class LocaleManager private constructor(private val context: Context) {
                 LanguageItem(
                     code = SYSTEM_DEFAULT,
                     displayName = "Sistema ($systemDisplayName)",
-                    nativeName = systemDisplayName,
+                    nativeName = "Sistema",
                     completionStatus = CompletionStatus.COMPLETE,
                     isSystemDefault = true,
                     flag = "🌐"
                 )
             )
 
-            // Agregar idiomas detectados
-            availableLocaleCodes.forEach { localeCode ->
+            // Agregar idiomas detectados directamente de LanguageCodeToName
+            LanguageCodeToName.forEach { (code, name) ->
                 try {
-                    val locale = parseLocaleCode(localeCode)
-                    val displayName = locale.getDisplayLanguage(Locale.ENGLISH)
-                        .replaceFirstChar { it.uppercase() }
-                    val nativeName = locale.getDisplayLanguage(locale)
-                        .replaceFirstChar { it.uppercase() }
-
-                    // Obtener metadata (bandera y estado)
-                    val metadata = LANGUAGE_METADATA[localeCode]
-                        ?: LanguageMetadata("🌍", CompletionStatus.COMPLETE)
-
                     languages.add(
                         LanguageItem(
-                            code = localeCode,
-                            displayName = displayName,
-                            nativeName = nativeName,
-                            completionStatus = metadata.completionStatus,
+                            code = code,
+                            displayName = name,
+                            nativeName = name,
+                            completionStatus = CompletionStatus.COMPLETE,
                             isSystemDefault = false,
-                            flag = metadata.flag
+                            flag = "🌐"
                         )
                     )
                 } catch (e: Exception) {
-                    Timber.tag(TAG).e(e, "Error procesando locale: $localeCode")
+                    Timber.tag(TAG).e(e, "Error procesando locale: $code")
                 }
             }
 
-            // Ordenar por: sistema primero, luego completos, luego alfabéticamente
+            // Ordenar por: sistema primero, luego alfabéticamente
             val sorted = languages.sortedWith(
                 compareBy<LanguageItem> { !it.isSystemDefault }
-                    .thenBy { it.completionStatus.ordinal }
                     .thenBy { it.displayName }
             )
 
@@ -641,7 +594,7 @@ private fun SearchBar(
                 decorationBox = { innerTextField ->
                     if (query.isEmpty()) {
                         Text(
-                            text = "Buscar idioma...",
+                            text = "Buscar idioma...", // Intentionally not localized for generic placeholder
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -690,7 +643,7 @@ private fun ChangeStateIndicator(
             )
             Spacer(modifier = Modifier.width(12.dp))
             Text(
-                text = "Aplicando...",
+                text = "Aplicando...", // Keep these generic or use stringResource if created later
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

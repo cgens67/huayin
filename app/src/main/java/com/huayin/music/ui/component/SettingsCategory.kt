@@ -20,8 +20,8 @@ import com.huayin.music.R
 data class SettingsCategoryItem(
     val icon: Painter? = null,
     val title: @Composable () -> Unit,
-    val description: (@Composable () -> Unit)? = null,
-    val trailingContent: (@Composable () -> Unit)? = null,
+    val description: @Composable (() -> Unit)? = null, // Changed to Composable to support flexible text
+    val trailingContent: @Composable (() -> Unit)? = null,
     val showBadge: Boolean = false,
     val isHighlighted: Boolean = false,
     val onClick: (() -> Unit)? = null
@@ -115,6 +115,7 @@ fun SettingsGeneralCategory(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun Material3SettingsItemRow(
     item: SettingsCategoryItem,
@@ -157,12 +158,17 @@ private fun Material3SettingsItemRow(
             }
         }
 
-        item.trailingContent?.invoke() ?: Icon(
-            painter = painterResource(R.drawable.arrow_forward),
-            contentDescription = null,
-            modifier = Modifier.size(16.dp),
-            tint = MaterialTheme.colorScheme.outline
-        )
+        val trailing = item.trailingContent
+        if (trailing != null) {
+            trailing()
+        } else {
+            Icon(
+                painter = painterResource(R.drawable.arrow_forward),
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+                tint = MaterialTheme.colorScheme.outline
+            )
+        }
     }
 
     if (showDivider) {

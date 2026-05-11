@@ -122,6 +122,7 @@ sealed class LanguageChangeState {
     object Success : LanguageChangeState()
     data class Error(val message: String) : LanguageChangeState()
 }
+
 class LocaleManager private constructor(private val context: Context) {
 
     companion object {
@@ -213,85 +214,10 @@ class LocaleManager private constructor(private val context: Context) {
             systemCode
         }
     }
+
     private fun detectAvailableLanguages(): List<String> {
-        val availableLocales = mutableSetOf<String>()
-
-        try {
-            val assetManager = context.assets
-            val locales = assetManager.locales
-
-            locales.forEach { localeString ->
-                if (localeString.isNotEmpty()) {
-                    availableLocales.add(localeString)
-                }
-            }
-
-            if (availableLocales.isEmpty()) {
-                val pm = context.packageManager
-                val res = pm.getResourcesForApplication(context.packageName)
-
-                // Intentar detectar mediante configuraciones disponibles
-                val configs = res.assets.locales
-                configs.forEach { locale ->
-                    if (locale.isNotEmpty()) {
-                        availableLocales.add(locale)
-                    }
-                }
-            }
-
-            if (availableLocales.isEmpty()) {
-                val commonLocales = listOf(
-                    "en", "es", "fr", "de", "it", "pt", "pt-rBR",
-                    "ru", "zh-rCN", "zh-rTW", "ja", "ko", "ar",
-                    "hi", "th", "vi", "tr", "pl", "nl", "id", "uk", "he"
-                )
-
-                commonLocales.forEach { localeCode ->
-                    if (hasTranslationsForLocale(localeCode)) {
-                        availableLocales.add(localeCode)
-                    }
-                }
-            }
-
-            Timber.tag(TAG).d("Idiomas detectados: $availableLocales")
-        } catch (e: Exception) {
-            Timber.tag(TAG).e(e, "Error detectando idiomas disponibles")
-            // Fallback al idioma por defecto
-            availableLocales.add("en")
-        }
-
-        return availableLocales.toList()
+        return LANGUAGE_METADATA.keys.toList()
     }
-
-    /**
-     * Verifica si existen traducciones para un locale específico
-     */
-    private fun hasTranslationsForLocale(localeCode: String): Boolean {
-        return try {
-            val locale = parseLocaleCode(localeCode)
-            val config = Configuration(context.resources.configuration)
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                config.setLocale(locale)
-            } else {
-                config.locale = locale
-            }
-
-            val localizedContext = context.createConfigurationContext(config)
-            val localizedResources = localizedContext.resources
-
-            // Intentar obtener un string básico para verificar
-            try {
-                val appName = localizedResources.getString(R.string.app_name)
-                true
-            } catch (e: Resources.NotFoundException) {
-                false
-            }
-        } catch (e: Exception) {
-            false
-        }
-    }
-
 
     private fun formatLocaleCode(locale: Locale): String {
         val language = locale.language
@@ -391,8 +317,10 @@ class LocaleManager private constructor(private val context: Context) {
                     .thenBy { it.displayName }
             )
 
-            _cachedLanguages = sorted
-            sorted
+            val distinctLanguages = sorted.distinctBy { it.code }
+
+            _cachedLanguages = distinctLanguages
+            distinctLanguages
         }
     }
 
@@ -518,9 +446,6 @@ class LocaleManager private constructor(private val context: Context) {
         _changeState.value = LanguageChangeState.Idle
     }
 }
-
-// Los composables permanecen igual...
-// (LanguageSelector, SearchBar, ChangeStateIndicator, etc.)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -1065,4 +990,3 @@ abstract class LocaleAwareApplication : android.app.Application() {
         localeManager.clearCache()
     }
 }
-

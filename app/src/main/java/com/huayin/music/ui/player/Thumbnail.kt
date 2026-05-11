@@ -5,7 +5,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.snapping.SnapLayoutInfoProvider
@@ -23,11 +22,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEach
@@ -37,7 +33,6 @@ import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.huayin.music.LocalPlayerConnection
-import com.huayin.music.R
 import com.huayin.music.constants.*
 import com.huayin.music.ui.component.AppConfig
 import com.huayin.music.utils.rememberEnumPreference
@@ -58,7 +53,6 @@ fun Thumbnail(
 
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
     val error by playerConnection.error.collectAsState()
-    val queueTitle by playerConnection.queueTitle.collectAsState()
 
     val swipeThumbnail by rememberPreference(SwipeThumbnailKey, true)
     val canSkipPrevious by playerConnection.canSkipPrevious.collectAsState()
@@ -74,11 +68,6 @@ fun Thumbnail(
     var thumbnailCornerRadius by remember { mutableStateOf(16f) }
     LaunchedEffect(Unit) {
         thumbnailCornerRadius = AppConfig.getThumbnailCornerRadius(context)
-    }
-
-    val textBackgroundColor = when (playerBackground) {
-        PlayerBackgroundStyle.DEFAULT -> MaterialTheme.colorScheme.onBackground
-        else -> Color.White
     }
 
     val thumbnailLazyGridState = rememberLazyGridState()
@@ -99,7 +88,6 @@ fun Thumbnail(
 
     val currentMediaItem = playerConnection.player.currentMediaItem
     val mediaItems = listOfNotNull(previousMediaMetadata, currentMediaItem, nextMediaMetadata)
-    val currentMediaIndex = mediaItems.indexOf(currentMediaItem)
 
     val snapProvider = remember(thumbnailLazyGridState) {
         SnapLayoutInfoProvider(
@@ -122,32 +110,12 @@ fun Thumbnail(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (!isAppleMusicStyle) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.playing_from),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = textBackgroundColor
-                        )
-
-                        val playingFrom = queueTitle ?: mediaMetadata?.album?.title
-                        if (!playingFrom.isNullOrBlank()) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = playingFrom,
-                                style = MaterialTheme.typography.titleMedium,
-                                color = textBackgroundColor.copy(alpha = 0.8f),
-                                maxLines = 1,
-                                modifier = Modifier.basicMarquee()
-                            )
-                        }
-                    }
-                } else {
+                if (isAppleMusicStyle) {
                     Spacer(modifier = Modifier.height(24.dp))
+                } else {
+                    Spacer(modifier = Modifier.height(32.dp))
                 }
+                
                 BoxWithConstraints(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center

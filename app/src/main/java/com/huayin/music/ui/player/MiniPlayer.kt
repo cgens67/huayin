@@ -19,7 +19,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -63,7 +65,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -182,6 +183,19 @@ fun MiniPlayer(
     }
     val autoSwipeThreshold = calculateAutoSwipeThreshold(0.73f)
 
+    val draggableState = rememberDraggableState { dragAmount ->
+        val adjustedDragAmount =
+            if (layoutDirection == LayoutDirection.Rtl) -dragAmount else dragAmount
+        val allowLeft = adjustedDragAmount < 0 && canSkipNext
+        val allowRight = adjustedDragAmount > 0 && canSkipPrevious
+        if (allowLeft || allowRight) {
+            totalDragDistance += adjustedDragAmount.absoluteValue
+            coroutineScope.launch {
+                offsetXAnimatable.snapTo(offsetXAnimatable.value + adjustedDragAmount)
+            }
+        }
+    }
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -216,65 +230,44 @@ fun MiniPlayer(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(miniPlayerBackgroundColor)
-                    .pointerInput(Unit) {
-                        detectHorizontalDragGestures(
-                            onDragStart = {
-                                dragStartTime = System.currentTimeMillis()
-                                totalDragDistance = 0f
-                            },
-                            onDragCancel = {
-                                coroutineScope.launch {
-                                    offsetXAnimatable.animateTo(
-                                        targetValue = 0f,
-                                        animationSpec = animationSpec
-                                    )
-                                }
-                            },
-                            onHorizontalDrag = { _, dragAmount ->
-                                val adjustedDragAmount =
-                                    if (layoutDirection == LayoutDirection.Rtl) -dragAmount else dragAmount
-                                val allowLeft = adjustedDragAmount < 0 && canSkipNext
-                                val allowRight = adjustedDragAmount > 0 && canSkipPrevious
-                                if (allowLeft || allowRight) {
-                                    totalDragDistance += adjustedDragAmount.absoluteValue
-                                    coroutineScope.launch {
-                                        offsetXAnimatable.snapTo(offsetXAnimatable.value + adjustedDragAmount)
-                                    }
-                                }
-                            },
-                            onDragEnd = {
-                                val dragDuration = System.currentTimeMillis() - dragStartTime
-                                val velocity =
-                                    if (dragDuration > 0) totalDragDistance / dragDuration else 0f
-                                val currentOffset = offsetXAnimatable.value
+                    .draggable(
+                        state = draggableState,
+                        orientation = Orientation.Horizontal,
+                        onDragStarted = {
+                            dragStartTime = System.currentTimeMillis()
+                            totalDragDistance = 0f
+                        },
+                        onDragStopped = { velocity ->
+                            val dragDuration = System.currentTimeMillis() - dragStartTime
+                            val vel = if (dragDuration > 0) totalDragDistance / dragDuration else 0f
+                            val currentOffset = offsetXAnimatable.value
 
-                                val minDistanceThreshold = 50f
-                                val velocityThreshold = (0.73f * -8.25f) + 8.5f
+                            val minDistanceThreshold = 50f
+                            val velocityThreshold = (0.73f * -8.25f) + 8.5f
 
-                                val shouldChangeSong = (
-                                        currentOffset.absoluteValue > minDistanceThreshold &&
-                                                velocity > velocityThreshold
-                                        ) || (currentOffset.absoluteValue > autoSwipeThreshold)
+                            val shouldChangeSong = (
+                                    currentOffset.absoluteValue > minDistanceThreshold &&
+                                            vel > velocityThreshold
+                                    ) || (currentOffset.absoluteValue > autoSwipeThreshold)
 
-                                if (shouldChangeSong) {
-                                    val isRightSwipe = currentOffset > 0
+                            if (shouldChangeSong) {
+                                val isRightSwipe = currentOffset > 0
 
-                                    if (isRightSwipe && canSkipPrevious) {
-                                        playerConnection.player.seekToPreviousMediaItem()
-                                    } else if (!isRightSwipe && canSkipNext) {
-                                        playerConnection.player.seekToNext()
-                                    }
-                                }
-
-                                coroutineScope.launch {
-                                    offsetXAnimatable.animateTo(
-                                        targetValue = 0f,
-                                        animationSpec = animationSpec
-                                    )
+                                if (isRightSwipe && canSkipPrevious) {
+                                    playerConnection.player.seekToPreviousMediaItem()
+                                } else if (!isRightSwipe && canSkipNext) {
+                                    playerConnection.player.seekToNext()
                                 }
                             }
-                        )
-                    }
+
+                            coroutineScope.launch {
+                                offsetXAnimatable.animateTo(
+                                    targetValue = 0f,
+                                    animationSpec = animationSpec
+                                )
+                            }
+                        }
+                    )
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,

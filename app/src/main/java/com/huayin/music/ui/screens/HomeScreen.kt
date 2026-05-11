@@ -16,6 +16,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -36,6 +40,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
@@ -115,6 +120,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.random.Random
 
+// Render Helpers producing COMPACT blocks showing up lots of objects seamlessly.
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun CompactLocalItem(
@@ -140,7 +146,7 @@ private fun CompactLocalItem(
             modifier = Modifier
                 .height(88.dp)
                 .fillMaxWidth()
-                .clip(if (item is Artist) CircleShape else RoundedCornerShape(12.dp)),
+                .clip(if (item is Artist) CircleShape else RoundedCornerShape(8.dp)),
             contentAlignment = Alignment.Center
         ) {
             AsyncImage(
@@ -196,7 +202,7 @@ private fun CompactYTGridItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(1f)
-                .clip(if (item is ArtistItem) CircleShape else RoundedCornerShape(12.dp)),
+                .clip(if (item is ArtistItem) CircleShape else RoundedCornerShape(8.dp)),
             contentAlignment = Alignment.Center
         ) {
             AsyncImage(
@@ -298,7 +304,7 @@ fun HomeScreen(
             item {
                 Row(
                     modifier = Modifier
-                        .windowInsetsPadding(androidx.compose.foundation.layout.WindowInsets.systemBars.only(androidx.compose.foundation.layout.WindowInsetsSides.Horizontal))
+                        .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
                         .fillMaxWidth()
                         .animateItem()
                 ) {
@@ -325,7 +331,7 @@ fun HomeScreen(
                 }
             }
 
-            // Quick Picks: Redesigned for verticality and proper edge padding
+            // High impact Material3 Carousel serving rich big visual representation to draw emphasis quickly
             quickPicks?.takeIf { it.isNotEmpty() }?.let { quickPicksList ->
                 item {
                     NavigationTitle(
@@ -338,12 +344,12 @@ fun HomeScreen(
                     val carouselState = rememberCarouselState { quickPicksList.size }
                     HorizontalMultiBrowseCarousel(
                         state = carouselState,
-                        preferredItemWidth = 186.dp, // Balanced width for taller layout
-                        itemSpacing = 8.dp,
-                        contentPadding = PaddingValues(horizontal = 20.dp), // Prevents touching screen borders
+                        preferredItemWidth = 180.dp,
+                        itemSpacing = 12.dp,
+                        contentPadding = PaddingValues(horizontal = 24.dp), // Distinct padding so it doesn't touch edges when snapped
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(280.dp) // Vertically longer as requested
+                            .height(280.dp) // Taller vertically
                             .animateItem()
                     ) { index ->
                         val originalSong = quickPicksList[index]
@@ -352,7 +358,7 @@ fun HomeScreen(
 
                         Card(
                             modifier = Modifier
-                                .maskClip(RoundedCornerShape(24.dp)) // Correct way to handle M3 Carousel clipping
+                                .maskClip(RoundedCornerShape(24.dp))
                                 .fillMaxSize()
                                 .combinedClickable(
                                     onClick = {
@@ -374,6 +380,7 @@ fun HomeScreen(
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                         ) {
                             Box(modifier = Modifier.fillMaxSize()) {
+                                // Full Cover Background
                                 AsyncImage(
                                     model = song!!.song.thumbnailUrl,
                                     contentDescription = null,
@@ -381,7 +388,7 @@ fun HomeScreen(
                                     modifier = Modifier.fillMaxSize()
                                 )
 
-                                // Dark gradient for text readability
+                                // Gradient Scrim for readable text
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -391,14 +398,14 @@ fun HomeScreen(
                                             Brush.verticalGradient(
                                                 colors = listOf(
                                                     Color.Transparent,
-                                                    Color.Black.copy(alpha = 0.7f),
-                                                    Color.Black.copy(alpha = 0.9f)
+                                                    Color.Black.copy(alpha = 0.6f),
+                                                    Color.Black.copy(alpha = 0.95f)
                                                 )
                                             )
                                         )
                                 )
 
-                                // Playing overlay
+                                // Active/Playing Overlay
                                 val overlayAlpha by animateFloatAsState(
                                     targetValue = if (isActive) 1f else 0f,
                                     animationSpec = tween(300),
@@ -415,12 +422,12 @@ fun HomeScreen(
                                             painterResource(if (isPlaying) R.drawable.pause else R.drawable.play),
                                             contentDescription = null,
                                             tint = Color.White.copy(alpha = overlayAlpha),
-                                            modifier = Modifier.size(48.dp)
+                                            modifier = Modifier.size(64.dp)
                                         )
                                     }
                                 }
 
-                                // Song details overlaid
+                                // Overlaid Content Details
                                 Column(
                                     modifier = Modifier
                                         .align(Alignment.BottomStart)
@@ -429,18 +436,16 @@ fun HomeScreen(
                                 ) {
                                     Text(
                                         text = song!!.song.title,
-                                        style = MaterialTheme.typography.titleMedium.copy(
-                                            fontWeight = FontWeight.Black,
-                                            lineHeight = 18.sp
-                                        ),
+                                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black),
                                         color = Color.White,
                                         maxLines = 2,
                                         overflow = TextOverflow.Ellipsis
                                     )
+                                    Spacer(modifier = Modifier.height(4.dp))
                                     Text(
                                         text = song!!.artists.joinToString { it.name },
-                                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
-                                        color = Color.White.copy(alpha = 0.8f),
+                                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                                        color = Color.White.copy(alpha = 0.85f),
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
@@ -451,9 +456,11 @@ fun HomeScreen(
                 }
             }
 
-            // Categories: Shrunk to 88.dp width to show more content
+            // Extremely compressed categories rendering (Ultra thin horizontal blocks resolving space efficiently!)
             keepListening?.takeIf { it.isNotEmpty() }?.let { keepList ->
-                item { NavigationTitle(title = "不曾暂停续放队列") }
+                item {
+                    NavigationTitle(title = "不曾暂停续放队列")
+                }
                 item {
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -527,7 +534,7 @@ fun HomeScreen(
                                 isPlaying = isPlaying,
                                 onNavigate = { navController.navigate("online_playlist/${it.id}") },
                                 onMenuShow = {
-                                    menuState.show { YouTubePlaylistMenu(it as com.huayin.music.innertube.models.PlaylistItem, coroutineScope= scope, onDismiss = menuState::dismiss) }
+                                    menuState.show { YouTubePlaylistMenu(it as PlaylistItem, coroutineScope= scope, onDismiss = menuState::dismiss) }
                                 }
                             )
                         }
@@ -568,7 +575,7 @@ fun HomeScreen(
                                         is SongItem -> playerConnection.playQueue(YouTubeQueue(yi.endpoint?:WatchEndpoint(videoId=yi.id), yi.toMediaMetadata()))
                                         is AlbumItem -> navController.navigate("album/${yi.id}")
                                         is ArtistItem -> navController.navigate("artist/${yi.id}")
-                                        is com.huayin.music.innertube.models.PlaylistItem -> navController.navigate("online_playlist/${yi.id}")
+                                        is PlaylistItem -> navController.navigate("online_playlist/${yi.id}")
                                     }
                                 },
                                 onMenuShow = {
@@ -577,7 +584,7 @@ fun HomeScreen(
                                             is SongItem -> YouTubeSongMenu(yi, navController, menuState::dismiss)
                                             is AlbumItem -> YouTubeAlbumMenu(yi, navController, menuState::dismiss)
                                             is ArtistItem -> YouTubeArtistMenu(yi, menuState::dismiss)
-                                            is com.huayin.music.innertube.models.PlaylistItem -> YouTubePlaylistMenu(yi, coroutineScope = scope, onDismiss = menuState::dismiss)
+                                            is PlaylistItem -> YouTubePlaylistMenu(yi, coroutineScope = scope, onDismiss = menuState::dismiss)
                                         }
                                     }
                                 }
@@ -589,7 +596,10 @@ fun HomeScreen(
 
             homePage?.sections?.forEach { sectionInfo ->
                 item {
-                    NavigationTitle(title = sectionInfo.title, label = sectionInfo.label)
+                    NavigationTitle(
+                        title = sectionInfo.title,
+                        label = sectionInfo.label,
+                    )
                 }
                 item {
                     LazyRow(
@@ -606,7 +616,7 @@ fun HomeScreen(
                                         is SongItem -> playerConnection.playQueue(YouTubeQueue(itemVal.endpoint?:WatchEndpoint(videoId=itemVal.id), itemVal.toMediaMetadata()))
                                         is AlbumItem -> navController.navigate("album/${itemVal.id}")
                                         is ArtistItem -> navController.navigate("artist/${itemVal.id}")
-                                        is com.huayin.music.innertube.models.PlaylistItem -> navController.navigate("online_playlist/${itemVal.id}")
+                                        is PlaylistItem -> navController.navigate("online_playlist/${itemVal.id}")
                                     }
                                 },
                                 onMenuShow = {
@@ -615,7 +625,7 @@ fun HomeScreen(
                                             is SongItem -> YouTubeSongMenu(itemVal, navController, menuState::dismiss)
                                             is AlbumItem -> YouTubeAlbumMenu(itemVal, navController, menuState::dismiss)
                                             is ArtistItem -> YouTubeArtistMenu(itemVal, menuState::dismiss)
-                                            is com.huayin.music.innertube.models.PlaylistItem -> YouTubePlaylistMenu(itemVal, coroutineScope = scope, onDismiss = menuState::dismiss)
+                                            is PlaylistItem -> YouTubePlaylistMenu(itemVal, coroutineScope = scope, onDismiss = menuState::dismiss)
                                         }
                                     }
                                 }
@@ -679,7 +689,9 @@ fun HomeScreen(
                     ShimmerHost {
                         TextPlaceholder(
                             height = 36.dp,
-                            modifier = Modifier.padding(12.dp).width(250.dp),
+                            modifier = Modifier
+                                .padding(12.dp)
+                                .width(250.dp),
                         )
                         LazyRow(contentPadding = PaddingValues(horizontal = 16.dp)) {
                             items(4) { GridItemPlaceHolder(modifier=Modifier.width(88.dp), fillMaxWidth=true) }
@@ -709,7 +721,9 @@ fun HomeScreen(
                                 val albumWithSongs = withContext(Dispatchers.IO) {
                                     database.albumWithSongs(luckyItem.id).first()
                                 }
-                                albumWithSongs?.let { playerConnection.playQueue(LocalAlbumRadio(it)) }
+                                albumWithSongs?.let {
+                                    playerConnection.playQueue(LocalAlbumRadio(it))
+                                }
                             }
                             else -> {}
                         }
@@ -717,8 +731,12 @@ fun HomeScreen(
                         when (val luckyItem = allYtItems.random()) {
                             is SongItem -> playerConnection.playQueue(YouTubeQueue.radio(luckyItem.toMediaMetadata()))
                             is AlbumItem -> playerConnection.playQueue(YouTubeAlbumRadio(luckyItem.playlistId))
-                            is ArtistItem -> luckyItem.radioEndpoint?.let { playerConnection.playQueue(YouTubeQueue(it)) }
-                            is PlaylistItem -> luckyItem.playEndpoint?.let { playerConnection.playQueue(YouTubeQueue(it)) }
+                            is ArtistItem -> luckyItem.radioEndpoint?.let {
+                                playerConnection.playQueue(YouTubeQueue(it))
+                            }
+                            is PlaylistItem -> luckyItem.playEndpoint?.let {
+                                playerConnection.playQueue(YouTubeQueue(it))
+                            }
                         }
                     }
                 }
@@ -728,7 +746,9 @@ fun HomeScreen(
         Indicator(
             isRefreshing = isRefreshing,
             state = pullRefreshState,
-            modifier = Modifier.align(Alignment.TopCenter).padding(LocalPlayerAwareWindowInsets.current.asPaddingValues()),
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(LocalPlayerAwareWindowInsets.current.asPaddingValues()),
         )
     }
 }

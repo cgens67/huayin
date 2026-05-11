@@ -11,8 +11,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.huayin.music.R
+
+/** Data class for Material 3 settings item */
+data class SettingsCategoryItem(
+    val icon: Painter? = null,
+    val title: @Composable () -> Unit,
+    val description: (@Composable () -> Unit)? = null,
+    val trailingContent: (@Composable () -> Unit)? = null,
+    val showBadge: Boolean = false,
+    val isHighlighted: Boolean = false,
+    val onClick: (() -> Unit)? = null
+)
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -39,7 +52,7 @@ fun SettingsCategory(
             modifier = Modifier
                 .fillMaxWidth()
                 .animateContentSize(),
-            shape = RoundedCornerShape(28.dp), // Expressive Large Radius
+            shape = RoundedCornerShape(28.dp),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceContainerLow
             ),
@@ -51,6 +64,51 @@ fun SettingsCategory(
                         item = item,
                         showDivider = index < items.size - 1
                     )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SettingsGeneralCategory(
+    title: String? = null,
+    items: List<@Composable () -> Unit>
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+    ) {
+        title?.let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(start = 0.dp, bottom = 8.dp, top = 8.dp)
+            )
+        }
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .animateContentSize(),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        ) {
+            Column {
+                items.forEachIndexed { index, item ->
+                    item()
+                    if (index < items.size - 1) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(start = 76.dp, end = 20.dp),
+                            thickness = 0.5.dp,
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+                        )
+                    }
                 }
             }
         }
@@ -99,14 +157,14 @@ private fun Material3SettingsItemRow(
             }
         }
 
-        Icon(
+        item.trailingContent?.invoke() ?: Icon(
             painter = painterResource(R.drawable.arrow_forward),
             contentDescription = null,
             modifier = Modifier.size(16.dp),
             tint = MaterialTheme.colorScheme.outline
         )
     }
-    
+
     if (showDivider) {
         HorizontalDivider(
             modifier = Modifier.padding(horizontal = 20.dp),

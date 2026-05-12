@@ -1,3 +1,4 @@
+// File: huayin-main/app/src/main/java/com/huayin/music/ui/player/Thumbnail.kt
 package com.huayin.music.ui.player
 
 import androidx.compose.animation.AnimatedVisibility
@@ -5,12 +6,10 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.snapping.SnapLayoutInfoProvider
-import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.*
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,7 +25,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.util.fastForEach
 import androidx.media3.common.C
 import androidx.media3.common.Player
 import coil.compose.AsyncImage
@@ -38,7 +36,6 @@ import com.huayin.music.ui.component.AppConfig
 import com.huayin.music.utils.rememberEnumPreference
 import com.huayin.music.utils.rememberPreference
 import kotlinx.coroutines.delay
-import kotlin.math.abs
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -70,8 +67,6 @@ fun Thumbnail(
         thumbnailCornerRadius = AppConfig.getThumbnailCornerRadius(context)
     }
 
-    val thumbnailLazyGridState = rememberLazyGridState()
-
     val timeline = playerConnection.player.currentTimeline
     val currentIndex = playerConnection.player.currentMediaItemIndex
     val shuffleModeEnabled = playerConnection.player.shuffleModeEnabled
@@ -88,15 +83,6 @@ fun Thumbnail(
 
     val currentMediaItem = playerConnection.player.currentMediaItem
     val mediaItems = listOfNotNull(previousMediaMetadata, currentMediaItem, nextMediaMetadata)
-
-    val snapProvider = remember(thumbnailLazyGridState) {
-        SnapLayoutInfoProvider(
-            lazyGridState = thumbnailLazyGridState,
-            positionInLayout = { layoutSize, itemSize ->
-                layoutSize / 2f - itemSize / 2f
-            }
-        )
-    }
 
     Box(modifier = modifier) {
 
@@ -121,56 +107,76 @@ fun Thumbnail(
                     contentAlignment = Alignment.Center
                 ) {
                     val size = maxWidth - PlayerHorizontalPadding * 2
+                    val startIndex = if (previousMediaMetadata != null) 1 else 0
 
-                    LazyHorizontalGrid(
-                        rows = GridCells.Fixed(1),
-                        state = thumbnailLazyGridState,
-                        flingBehavior = rememberSnapFlingBehavior(snapProvider),
+                    val pagerState = rememberPagerState(
+                        initialPage = startIndex,
+                        pageCount = { mediaItems.size }
+                    )
+
+                    // Snap back to the center page when the current media item changes
+                    LaunchedEffect(currentMediaItem) {
+                        pagerState.scrollToPage(if (previousMediaMetadata != null) 1 else 0)
+                    }
+
+                    LaunchedEffect(pagerState.settledPage) {
+                        val currentStartIndex = if (previousMediaMetadata != null) 1 else 0
+                        if (pagerState.settledPage != currentStartIndex) {
+                            if (pagerState.settledPage < currentStartIndex && canSkipPrevious) {
+                                playerConnection.player.seekToPreviousMediaItem()
+                            } else if (pagerState.settledPage > currentStartIndex && canSkipNext) {
+                                playerConnection.player.seekToNext()
+                            } else {
+                                pagerState.scrollToPage(currentStartIndex)
+                            }
+                        }
+                    }
+
+                    HorizontalPager(
+                        state = pagerState,
                         userScrollEnabled = swipeThumbnail && isPlayerExpanded,
                         modifier = Modifier.fillMaxSize()
-                    ) {
-                        items(mediaItems) { item ->
-                            Box(
-                                modifier = Modifier
-                                    .width(maxWidth)
-                                    .fillMaxSize()
-                                    .pointerInput(Unit) {
-                                        detectTapGestures(
-                                            onTap = { onOpenFullscreenLyrics() },
-                                            onDoubleTap = { offset ->
-                                                if (offset.x < size.toPx() / 2) {
-                                                    playerConnection.player.seekBack()
-                                                } else {
-                                                    playerConnection.player.seekForward()
-                                                }
+                    ) { page ->
+                        val item = mediaItems.getOrNull(page)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .pointerInput(Unit) {
+                                    detectTapGestures(
+                                        onTap = { onOpenFullscreenLyrics() },
+                                        onDoubleTap = { offset ->
+                                            if (offset.x < size.toPx() / 2) {
+                                                playerConnection.player.seekBack()
+                                            } else {
+                                                playerConnection.player.seekForward()
                                             }
-                                        )
-                                    },
-                                contentAlignment = Alignment.Center
-                            ) {
+                                        }
+                                    )
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
 
-                                if (isAppleMusicStyle) {
-                                    // CARÁTULA OCULTA
-                                    Box(modifier = Modifier.size(size))
-                                } else {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(size)
-                                            .clip(RoundedCornerShape(thumbnailCornerRadius.dp * 2))
-                                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                                    ) {
-                                        AsyncImage(
-                                            model = ImageRequest.Builder(LocalContext.current)
-                                                .data(item.mediaMetadata.artworkUri?.toString())
-                                                .memoryCachePolicy(CachePolicy.ENABLED)
-                                                .diskCachePolicy(CachePolicy.ENABLED)
-                                                .networkCachePolicy(CachePolicy.ENABLED)
-                                                .build(),
-                                            contentDescription = null,
-                                            contentScale = ContentScale.Fit,
-                                            modifier = Modifier.fillMaxSize()
-                                        )
-                                    }
+                            if (isAppleMusicStyle) {
+                                // CARÁTULA OCULTA
+                                Box(modifier = Modifier.size(size))
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .size(size)
+                                        .clip(RoundedCornerShape(thumbnailCornerRadius.dp * 2))
+                                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                                ) {
+                                    AsyncImage(
+                                        model = ImageRequest.Builder(LocalContext.current)
+                                            .data(item?.mediaMetadata?.artworkUri?.toString())
+                                            .memoryCachePolicy(CachePolicy.ENABLED)
+                                            .diskCachePolicy(CachePolicy.ENABLED)
+                                            .networkCachePolicy(CachePolicy.ENABLED)
+                                            .build(),
+                                        contentDescription = null,
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
                                 }
                             }
                         }
@@ -208,44 +214,3 @@ fun Thumbnail(
         }
     }
 }
-@ExperimentalFoundationApi
-fun SnapLayoutInfoProvider(
-    lazyGridState: LazyGridState,
-    positionInLayout: (layoutSize: Float, itemSize: Float) -> Float,
-): SnapLayoutInfoProvider = object : SnapLayoutInfoProvider {
-
-    private val layoutInfo: LazyGridLayoutInfo
-        get() = lazyGridState.layoutInfo
-
-    override fun calculateApproachOffset(velocity: Float, decayOffset: Float) = 0f
-
-    override fun calculateSnapOffset(velocity: Float): Float {
-        val bounds = calculateBounds()
-        return if (abs(bounds.start) < abs(bounds.endInclusive)) bounds.start else bounds.endInclusive
-    }
-
-    private fun calculateBounds(): ClosedFloatingPointRange<Float> {
-        var lower = Float.NEGATIVE_INFINITY
-        var upper = Float.POSITIVE_INFINITY
-
-        layoutInfo.visibleItemsInfo.fastForEach { item ->
-            val offset = calculateDistanceToDesiredSnapPosition(layoutInfo, item, positionInLayout)
-            if (offset <= 0 && offset > lower) lower = offset
-            if (offset >= 0 && offset < upper) upper = offset
-        }
-        return lower..upper
-    }
-}
-
-fun calculateDistanceToDesiredSnapPosition(
-    layoutInfo: LazyGridLayoutInfo,
-    item: LazyGridItemInfo,
-    positionInLayout: (layoutSize: Float, itemSize: Float) -> Float,
-): Float {
-    val containerSize =
-        layoutInfo.singleAxisViewportSize - layoutInfo.beforeContentPadding - layoutInfo.afterContentPadding
-    return item.offset.x - positionInLayout(containerSize.toFloat(), item.size.width.toFloat())
-}
-
-private val LazyGridLayoutInfo.singleAxisViewportSize: Int
-    get() = if (orientation == Orientation.Vertical) viewportSize.height else viewportSize.width

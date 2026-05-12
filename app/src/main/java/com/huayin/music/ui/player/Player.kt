@@ -1,19 +1,10 @@
 package com.huayin.music.ui.player
 
-import android.annotation.SuppressLint
 import android.content.Intent
-import android.widget.Toast
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.*
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.*
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -21,17 +12,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.*
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.media3.common.C
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.media3.common.Player
 import androidx.navigation.NavController
 import com.huayin.music.LocalPlayerConnection
@@ -107,225 +95,241 @@ fun BottomSheetPlayer(
         )
     }
 
-    BottomSheet(
-        state = state,
-        modifier = modifier,
-        onDismiss = {
-            playerConnection.player.stop()
-            playerConnection.player.clearMediaItems()
-        },
-        background = {
-            Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface))
-        },
-        collapsedContent = { MiniPlayer(position = position, duration = duration) },
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp)
-                .verticalScroll(rememberScrollState())
-                .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Vertical))
+    BoxWithConstraints(modifier = modifier) {
+        val maxHeight = maxHeight
+        val queueBottomSheetState = rememberBottomSheetState(
+            dismissedBound = 0.dp,
+            expandedBound = maxHeight,
+        )
+
+        BottomSheet(
+            state = state,
+            onDismiss = {
+                playerConnection.player.stop()
+                playerConnection.player.clearMediaItems()
+            },
+            background = {
+                Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface))
+            },
+            collapsedContent = { MiniPlayer(position = position, duration = duration) },
         ) {
-            // 1. HEADER TITLE
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = "正在播放",
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            val topTitle = playerConnection.queueTitle.collectAsState().value ?: mediaMetadata?.album?.title ?: ""
-            Text(
-                text = topTitle.uppercase(),
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Spacer(Modifier.height(24.dp))
-
-            // 2. ALBUM ARTWORK
-            Box(
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(1f)
-                    .clip(RoundedCornerShape(32.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .fillMaxSize()
+                    .nestedScroll(queueBottomSheetState.preUpPostDownNestedScrollConnection)
+                    .verticalScroll(rememberScrollState())
+                    .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Vertical))
             ) {
-                Thumbnail(
-                    sliderPositionProvider = { sliderPosition },
-                    onOpenFullscreenLyrics = onOpenFullscreenLyrics,
-                    modifier = Modifier.fillMaxSize()
+                // 1. HEADER TITLE
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = "正在播放",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-            }
+                val topTitle = playerConnection.queueTitle.collectAsState().value ?: mediaMetadata?.album?.title ?: ""
+                Text(
+                    text = topTitle.uppercase(),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
 
-            Spacer(Modifier.height(28.dp))
+                Spacer(Modifier.height(24.dp))
 
-            // 3. TITLE / ARTIST + ACTION BUTTONS
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = mediaMetadata?.title ?: "",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        text = mediaMetadata?.artists?.joinToString { it.name } ?: "",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                // 2. ALBUM ARTWORK
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f)
+                        .clip(RoundedCornerShape(32.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                    Thumbnail(
+                        sliderPositionProvider = { sliderPosition },
+                        onOpenFullscreenLyrics = onOpenFullscreenLyrics,
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
 
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    SmallCircularAction(R.drawable.share) {
-                        mediaMetadata?.let {
-                            val intent = Intent(Intent.ACTION_SEND).apply {
-                                type = "text/plain"
-                                putExtra(Intent.EXTRA_TEXT, "https://music.youtube.com/watch?v=${it.id}")
-                            }
-                            context.startActivity(Intent.createChooser(intent, null))
-                        }
-                    }
-                    SmallCircularAction(
-                        icon = if (isLiked) R.drawable.favorite else R.drawable.favorite_border,
-                        tint = if (isLiked) MaterialTheme.colorScheme.error else null
-                    ) { playerConnection.toggleLike() }
-                    
-                    SmallCircularAction(R.drawable.more_horiz) {
-                        menuState.show {
-                            PlayerMenu(mediaMetadata, navController, state, onShowDetailsDialog = {}, onDismiss = { menuState.dismiss() })
-                        }
-                    }
-                }
-            }
+                Spacer(Modifier.height(28.dp))
 
-            Spacer(Modifier.height(24.dp))
-
-            // 4. CUSTOM SEEK BAR
-            Column(modifier = Modifier.fillMaxWidth()) {
+                // 3. TITLE / ARTIST + ACTION BUTTONS
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Vertical Bar at the start
-                    Box(
-                        modifier = Modifier
-                            .width(4.dp)
-                            .height(24.dp)
-                            .background(MaterialTheme.colorScheme.onSurface, RoundedCornerShape(2.dp))
-                    )
-                    Spacer(Modifier.width(4.dp))
-                    Slider(
-                        value = (sliderPosition ?: position).toFloat(),
-                        valueRange = 0f..(if (duration <= 0) 1f else duration.toFloat()),
-                        onValueChange = { sliderPosition = it.toLong() },
-                        onValueChangeFinished = {
-                            sliderPosition?.let { playerConnection.player.seekTo(it) }
-                            sliderPosition = null
-                        },
-                        colors = SliderDefaults.colors(
-                            thumbColor = MaterialTheme.colorScheme.onSurface,
-                            activeTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                            inactiveTrackColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                        ),
-                        modifier = Modifier.weight(1f)
-                    )
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = mediaMetadata?.title ?: "",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = mediaMetadata?.artists?.joinToString { it.name } ?: "",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        SmallCircularAction(R.drawable.share) {
+                            mediaMetadata?.let {
+                                val intent = Intent(Intent.ACTION_SEND).apply {
+                                    type = "text/plain"
+                                    putExtra(Intent.EXTRA_TEXT, "https://music.youtube.com/watch?v=${it.id}")
+                                }
+                                context.startActivity(Intent.createChooser(intent, null))
+                            }
+                        }
+                        SmallCircularAction(
+                            icon = if (isLiked) R.drawable.favorite else R.drawable.favorite_border,
+                            tint = if (isLiked) MaterialTheme.colorScheme.error else null
+                        ) { playerConnection.toggleLike() }
+                        
+                        SmallCircularAction(R.drawable.more_horiz) {
+                            menuState.show {
+                                PlayerMenu(mediaMetadata, navController, state, onShowDetailsDialog = {}, onDismiss = { menuState.dismiss() })
+                            }
+                        }
+                    }
                 }
 
+                Spacer(Modifier.height(24.dp))
+
+                // 4. CUSTOM SEEK BAR
+                Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Vertical Bar at the start
+                        Box(
+                            modifier = Modifier
+                                .width(4.dp)
+                                .height(24.dp)
+                                .background(MaterialTheme.colorScheme.onSurface, RoundedCornerShape(2.dp))
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Slider(
+                            value = (sliderPosition ?: position).toFloat(),
+                            valueRange = 0f..(if (duration <= 0) 1f else duration.toFloat()),
+                            onValueChange = { sliderPosition = it.toLong() },
+                            onValueChangeFinished = {
+                                sliderPosition?.let { playerConnection.player.seekTo(it) }
+                                sliderPosition = null
+                            },
+                            colors = SliderDefaults.colors(
+                                thumbColor = MaterialTheme.colorScheme.onSurface,
+                                activeTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                                inactiveTrackColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                            ),
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(makeTimeString(sliderPosition ?: position), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                        Text(makeTimeString(duration), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                    }
+                }
+
+                Spacer(Modifier.height(32.dp))
+
+                // 5. MAIN CONTROLS
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(makeTimeString(sliderPosition ?: position), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
-                    Text(makeTimeString(duration), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
-                }
-            }
+                    ControlIcon(R.drawable.shuffle, isShuffleEnabled) { playerConnection.toggleShuffle() }
+                    
+                    ControlIcon(R.drawable.skip_previous, size = 52.dp) { playerConnection.seekToPrevious() }
 
-            Spacer(Modifier.height(32.dp))
-
-            // 5. MAIN CONTROLS
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                ControlIcon(R.drawable.shuffle, isShuffleEnabled) { playerConnection.toggleShuffle() }
-                
-                ControlIcon(R.drawable.skip_previous, size = 52.dp) { playerConnection.seekToPrevious() }
-
-                // Play/Pause (Large Square)
-                Surface(
-                    onClick = { playerConnection.player.togglePlayPause() },
-                    modifier = Modifier.size(80.dp),
-                    shape = RoundedCornerShape(32.dp),
-                    color = MaterialTheme.colorScheme.onSurface
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            painter = painterResource(if (isPlaying) R.drawable.pause else R.drawable.play),
-                            contentDescription = null,
-                            modifier = Modifier.size(40.dp),
-                            tint = MaterialTheme.colorScheme.surface
-                        )
+                    // Play/Pause (Large Square)
+                    Surface(
+                        onClick = { playerConnection.player.togglePlayPause() },
+                        modifier = Modifier.size(80.dp),
+                        shape = RoundedCornerShape(32.dp),
+                        color = MaterialTheme.colorScheme.onSurface
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                painter = painterResource(if (isPlaying) R.drawable.pause else R.drawable.play),
+                                contentDescription = null,
+                                modifier = Modifier.size(40.dp),
+                                tint = MaterialTheme.colorScheme.surface
+                            )
+                        }
                     }
+
+                    ControlIcon(R.drawable.skip_next, size = 52.dp) { playerConnection.seekToNext() }
+
+                    ControlIcon(
+                        icon = when (repeatMode) {
+                            Player.REPEAT_MODE_ONE -> R.drawable.repeat_one
+                            else -> R.drawable.repeat
+                        },
+                        active = repeatMode != Player.REPEAT_MODE_OFF
+                    ) { playerConnection.player.toggleRepeatMode() }
                 }
 
-                ControlIcon(R.drawable.skip_next, size = 52.dp) { playerConnection.seekToNext() }
+                Spacer(Modifier.height(48.dp))
 
-                ControlIcon(
-                    icon = when (repeatMode) {
-                        Player.REPEAT_MODE_ONE -> R.drawable.repeat_one
-                        else -> R.drawable.repeat
-                    },
-                    active = repeatMode != Player.REPEAT_MODE_OFF
-                ) { playerConnection.player.toggleRepeatMode() }
-            }
-
-            Spacer(Modifier.height(48.dp))
-
-            // 6. BOTTOM QUICK ACTION PILLS
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                ActionPill(
-                    icon = R.drawable.queue_music,
-                    label = stringResource(R.string.queue),
-                    modifier = Modifier.weight(1.2f)
-                ) { state.expandSoft() }
-
-                Surface(
-                    onClick = { showSleepTimerDialog = true },
-                    modifier = Modifier.size(56.dp),
-                    shape = CircleShape,
-                    color = if (sleepTimerEnabled) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                // 6. BOTTOM QUICK ACTION PILLS
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            painter = painterResource(R.drawable.bedtime), 
-                            contentDescription = null, 
-                            modifier = Modifier.size(24.dp),
-                            tint = if (sleepTimerEnabled) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                }
+                    ActionPill(
+                        icon = R.drawable.queue_music,
+                        label = stringResource(R.string.queue),
+                        modifier = Modifier.weight(1.2f)
+                    ) { queueBottomSheetState.expandSoft() }
 
-                ActionPill(
-                    icon = R.drawable.lyrics,
-                    label = stringResource(R.string.lyrics),
-                    modifier = Modifier.weight(1.2f)
-                ) { onOpenFullscreenLyrics() }
+                    Surface(
+                        onClick = { showSleepTimerDialog = true },
+                        modifier = Modifier.size(56.dp),
+                        shape = CircleShape,
+                        color = if (sleepTimerEnabled) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                painter = painterResource(R.drawable.bedtime), 
+                                contentDescription = null, 
+                                modifier = Modifier.size(24.dp),
+                                tint = if (sleepTimerEnabled) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+
+                    ActionPill(
+                        icon = R.drawable.lyrics,
+                        label = stringResource(R.string.lyrics),
+                        modifier = Modifier.weight(1.2f)
+                    ) { onOpenFullscreenLyrics() }
+                }
+                Spacer(Modifier.height(24.dp))
             }
-            Spacer(Modifier.height(24.dp))
         }
+        
+        Queue(
+            state = queueBottomSheetState,
+            playerBottomSheetState = state,
+            navController = navController,
+            backgroundColor = MaterialTheme.colorScheme.surface,
+            onBackgroundColor = MaterialTheme.colorScheme.onSurface,
+            textBackgroundColor = MaterialTheme.colorScheme.onSurface,
+        )
     }
 }
 

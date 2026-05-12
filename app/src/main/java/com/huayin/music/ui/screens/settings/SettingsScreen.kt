@@ -1,3 +1,4 @@
+// File: huayin-main/app/src/main/java/com/huayin/music/ui/screens/settings/SettingsScreen.kt
 package com.huayin.music.ui.screens.settings
 
 import android.annotation.SuppressLint
@@ -11,7 +12,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -37,16 +40,14 @@ fun SettingsScreen(
     val innerTubeCookie by rememberPreference(InnerTubeCookieKey, "")
     val isLoggedIn = innerTubeCookie.contains("SAPISID")
 
-    Column(
-        Modifier
-            .fillMaxSize()
-            .windowInsetsPadding(LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
-            .verticalScroll(rememberScrollState())
-            .background(MaterialTheme.colorScheme.surface)
-    ) {
-        Spacer(Modifier.windowInsetsPadding(LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Top)))
-        Spacer(Modifier.height(16.dp))
+    var showChangelogBottomSheet by remember { mutableStateOf(false) }
+    var showSupportBottomSheet by remember { mutableStateOf(false) }
 
+    SettingsPage(
+        title = stringResource(R.string.settings),
+        navController = navController,
+        scrollBehavior = scrollBehavior
+    ) {
         ElevatedCard(
             modifier = Modifier.padding(16.dp).fillMaxWidth(),
             shape = RoundedCornerShape(32.dp),
@@ -174,7 +175,12 @@ fun SettingsScreen(
                 SettingsCategoryItem(
                     icon = painterResource(R.drawable.schedule),
                     title = { Text(stringResource(R.string.Changelog)) },
-                    onClick = { /* Open Changelog */ }
+                    onClick = { showChangelogBottomSheet = true }
+                ),
+                SettingsCategoryItem(
+                    icon = painterResource(R.drawable.favorite),
+                    title = { Text("Support Development") },
+                    onClick = { showSupportBottomSheet = true }
                 )
             )
         )
@@ -182,14 +188,74 @@ fun SettingsScreen(
         Spacer(Modifier.height(120.dp))
     }
 
-    TopAppBar(
-        title = { Text(stringResource(R.string.settings), fontWeight = FontWeight.Bold) },
-        navigationIcon = {
-            IconButton(onClick = { navController.navigateUp() }) {
-                Icon(painterResource(R.drawable.arrow_back), null)
-            }
-        },
-        scrollBehavior = scrollBehavior,
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f))
-    )
+    if (showChangelogBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showChangelogBottomSheet = false },
+            containerColor = MaterialTheme.colorScheme.surface,
+            dragHandle = { BottomSheetDefaults.DragHandle() }
+        ) {
+            com.huayin.music.ui.component.ChangelogScreen()
+            Spacer(Modifier.height(32.dp))
+        }
+    }
+
+    if (showSupportBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showSupportBottomSheet = false },
+            containerColor = MaterialTheme.colorScheme.surface,
+            dragHandle = { BottomSheetDefaults.DragHandle() }
+        ) {
+            SupportDevelopmentScreen()
+        }
+    }
+}
+
+@Composable
+fun SupportDevelopmentScreen() {
+    val uriHandler = LocalUriHandler.current
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp).padding(bottom = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.favorite),
+            contentDescription = null,
+            modifier = Modifier.size(48.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(Modifier.height(16.dp))
+        Text(
+            text = "Support OpenTune",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = "If you like OpenTune, consider supporting its development. Your contribution helps keep the project alive and ad-free.",
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(32.dp))
+        
+        Button(
+            onClick = { uriHandler.openUri("https://github.com/sponsors/Arturo254") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
+        ) {
+            Icon(painterResource(R.drawable.github), contentDescription = null, modifier = Modifier.size(20.dp))
+            Spacer(Modifier.width(12.dp))
+            Text("GitHub Sponsors")
+        }
+        Spacer(Modifier.height(12.dp))
+        Button(
+            onClick = { uriHandler.openUri("https://www.paypal.me/OpenTune") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00457C), contentColor = Color.White)
+        ) {
+            Icon(painterResource(R.drawable.paypal), contentDescription = null, modifier = Modifier.size(20.dp))
+            Spacer(Modifier.width(12.dp))
+            Text("PayPal")
+        }
+    }
 }

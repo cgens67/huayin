@@ -5,135 +5,41 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
-import android.media.audiofx.AudioEffect
+import android.net.Uri
 import android.os.SystemClock
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.basicMarquee
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.focusable
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.FilledTonalIconButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedIconButton
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.*
+import androidx.compose.foundation.interaction.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.ColorMatrix
-import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.isShiftPressed
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.input.key.type
+import androidx.compose.ui.*
+import androidx.compose.ui.draw.*
+import androidx.compose.ui.focus.*
+import androidx.compose.ui.geometry.*
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.input.key.*
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextLayoutResult
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.input.pointer.*
+import androidx.compose.ui.layout.*
+import androidx.compose.ui.platform.*
+import androidx.compose.ui.res.*
+import androidx.compose.ui.semantics.*
+import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.style.*
+import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.graphics.drawable.toBitmap
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.floatPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.media3.common.C
 import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
@@ -148,45 +54,16 @@ import coil.request.ImageRequest
 import com.huayin.music.LocalDownloadUtil
 import com.huayin.music.LocalPlayerConnection
 import com.huayin.music.R
-import com.huayin.music.constants.BlurRadiusKey
-import com.huayin.music.constants.DarkModeKey
-import com.huayin.music.constants.DefaultPlayPauseButtonShape
-import com.huayin.music.constants.DefaultSmallButtonsShape
-import com.huayin.music.constants.DisableBlurKey
-import com.huayin.music.constants.PlayerBackgroundStyle
-import com.huayin.music.constants.PlayerBackgroundStyleKey
-import com.huayin.music.constants.PlayerButtonsStyle
-import com.huayin.music.constants.PlayerButtonsStyleKey
-import com.huayin.music.constants.PlayerCustomBlurKey
-import com.huayin.music.constants.PlayerCustomBrightnessKey
-import com.huayin.music.constants.PlayerCustomContrastKey
-import com.huayin.music.constants.PlayerCustomImageUriKey
-import com.huayin.music.constants.PlayerDesignStyle
-import com.huayin.music.constants.PlayerDesignStyleKey
-import com.huayin.music.constants.PlayerHorizontalPadding
-import com.huayin.music.constants.PlayPauseButtonShapeKey
-import com.huayin.music.constants.PureBlackKey
-import com.huayin.music.constants.QueuePeekHeight
-import com.huayin.music.constants.SeekExtraSeconds
-import com.huayin.music.constants.SliderStyle
-import com.huayin.music.constants.SliderStyleKey
-import com.huayin.music.constants.SmallButtonsShapeKey
+import com.huayin.music.constants.*
 import com.huayin.music.db.entities.FormatEntity
 import com.huayin.music.db.entities.Song
+import com.huayin.music.extensions.metadata
+import com.huayin.music.extensions.toMediaItem
 import com.huayin.music.extensions.togglePlayPause
 import com.huayin.music.extensions.toggleRepeatMode
 import com.huayin.music.models.MediaMetadata
 import com.huayin.music.playback.PlayerConnection
-import com.huayin.music.ui.component.BottomSheet
-import com.huayin.music.ui.component.BottomSheetPageState
-import com.huayin.music.ui.component.BottomSheetState
-import com.huayin.music.ui.component.LocalBottomSheetPageState
-import com.huayin.music.ui.component.LocalMenuState
-import com.huayin.music.ui.component.Lyrics
-import com.huayin.music.ui.component.MenuState
-import com.huayin.music.ui.component.PlayerSliderTrack
-import com.huayin.music.ui.component.ResizableIconButton
-import com.huayin.music.ui.component.rememberBottomSheetState
+import com.huayin.music.ui.component.*
 import com.huayin.music.ui.menu.PlayerMenu
 import com.huayin.music.ui.screens.settings.DarkMode
 import com.huayin.music.ui.theme.PlayerColorExtractor
@@ -196,20 +73,30 @@ import com.huayin.music.utils.getSmallButtonShape
 import com.huayin.music.utils.makeTimeString
 import com.huayin.music.utils.rememberEnumPreference
 import com.huayin.music.utils.rememberPreference
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import me.saket.squiggles.SquigglySlider
 import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
-import android.net.Uri
-import androidx.core.graphics.drawable.toBitmap
 
 private const val SeekbarSettleToleranceMs = 1_500L
 private const val V7BackdropBlurHeightFraction = 0.54f
+
+internal val SwipeSensitivityKey = floatPreferencesKey("swipe_sensitivity")
+internal val SwipeThumbnailKey = booleanPreferencesKey("swipe_thumbnail")
+internal val HidePlayerThumbnailKey = booleanPreferencesKey("hide_player_thumbnail")
+internal val CropThumbnailToSquareKey = booleanPreferencesKey("crop_thumbnail_to_square")
+internal val SeekExtraSeconds = booleanPreferencesKey("seek_extra_seconds")
+internal val PlayerDesignStyleKey = stringPreferencesKey("player_design_style")
+internal val PlayerCustomImageUriKey = stringPreferencesKey("player_custom_image_uri")
+internal val PlayerCustomBlurKey = floatPreferencesKey("player_custom_blur")
+internal val PlayerCustomContrastKey = floatPreferencesKey("player_custom_contrast")
+internal val PlayerCustomBrightnessKey = floatPreferencesKey("player_custom_brightness")
+internal val DisableBlurKey = booleanPreferencesKey("disable_blur")
+internal val BlurRadiusKey = floatPreferencesKey("blur_radius")
+internal val ThumbnailCornerRadiusKey = floatPreferencesKey("thumbnail_corner_radius")
+
+enum class PlayerDesignStyle { V1, V2, V3, V4, V5, V6, V7 }
 
 object PlayerBackgroundColorUtils {
     fun buildBlurOverlayStops(gradientColors: List<Color>): Array<Pair<Float, Color>> {
@@ -355,7 +242,7 @@ fun BottomSheetPlayer(
     val canSkipPrevious by playerConnection.canSkipPrevious.collectAsState()
     val canSkipNext by playerConnection.canSkipNext.collectAsState()
 
-    val sliderStyle by rememberEnumPreference(SliderStyleKey, SliderStyle.Standard)
+    val sliderStyle by rememberEnumPreference(SliderStyleKey, SliderStyle.DEFAULT)
 
     var position by rememberSaveable(mediaMetadata?.id) {
         mutableLongStateOf(playerConnection.player.currentPosition)
@@ -393,7 +280,7 @@ fun BottomSheetPlayer(
     }
     
     LaunchedEffect(mediaMetadata?.id, playerBackground) {
-        if (playerBackground == PlayerBackgroundStyle.GRADIENT || playerBackground == PlayerBackgroundStyle.COLORING || playerBackground == PlayerBackgroundStyle.BLUR_GRADIENT || playerBackground == PlayerBackgroundStyle.GLOW || playerBackground == PlayerBackgroundStyle.GLOW_ANIMATED) {
+        if (playerBackground == PlayerBackgroundStyle.GRADIENT || playerBackground == PlayerBackgroundStyle.APPLE_MUSIC) {
             val currentMetadata = mediaMetadata
             if (currentMetadata != null && currentMetadata.thumbnailUrl != null) {
                 val cachedColors = gradientColorsCache[currentMetadata.id]
@@ -402,7 +289,7 @@ fun BottomSheetPlayer(
                 } else {
                     val request = ImageRequest.Builder(context)
                         .data(currentMetadata.thumbnailUrl)
-                        .size(400, 400) // Fallback constants
+                        .size(400, 400)
                         .allowHardware(false)
                         .build()
 
@@ -450,11 +337,7 @@ fun BottomSheetPlayer(
             PlayerBackgroundStyle.DEFAULT -> MaterialTheme.colorScheme.onBackground
             PlayerBackgroundStyle.BLUR -> Color.White
             PlayerBackgroundStyle.GRADIENT -> Color.White
-            PlayerBackgroundStyle.COLORING -> Color.White
-            PlayerBackgroundStyle.BLUR_GRADIENT -> Color.White
-            PlayerBackgroundStyle.GLOW -> Color.White
-            PlayerBackgroundStyle.GLOW_ANIMATED -> Color.White
-            PlayerBackgroundStyle.CUSTOM -> Color.White
+            PlayerBackgroundStyle.APPLE_MUSIC -> Color.White
         }
 
     val icBackgroundColor =
@@ -463,27 +346,20 @@ fun BottomSheetPlayer(
             PlayerBackgroundStyle.DEFAULT -> MaterialTheme.colorScheme.surface
             PlayerBackgroundStyle.BLUR -> Color.Black
             PlayerBackgroundStyle.GRADIENT -> Color.Black
-            PlayerBackgroundStyle.COLORING -> Color.Black
-            PlayerBackgroundStyle.BLUR_GRADIENT -> Color.Black
-            PlayerBackgroundStyle.GLOW -> Color.Black
-            PlayerBackgroundStyle.GLOW_ANIMATED -> Color.Black
-            PlayerBackgroundStyle.CUSTOM -> Color.Black
+            PlayerBackgroundStyle.APPLE_MUSIC -> Color.Black
         }
 
     val (textButtonColor, iconButtonColor) = when (playerButtonsStyle) {
         PlayerButtonsStyle.DEFAULT -> Pair(TextBackgroundColor, icBackgroundColor)
-        PlayerButtonsStyle.SECONDARY -> Pair(
-            MaterialTheme.colorScheme.secondary,
-            MaterialTheme.colorScheme.onSecondary
+        PlayerButtonsStyle.TERTIARY -> Pair(
+            MaterialTheme.colorScheme.tertiary,
+            MaterialTheme.colorScheme.onTertiary
         )
         PlayerButtonsStyle.PRIMARY -> Pair(
             MaterialTheme.colorScheme.primary,
             MaterialTheme.colorScheme.onPrimary
         )
-        PlayerButtonsStyle.TERTIARY -> Pair(
-            MaterialTheme.colorScheme.tertiary,
-            MaterialTheme.colorScheme.onTertiary
-        )
+        else -> Pair(TextBackgroundColor, icBackgroundColor)
     }.let { (tb, ib) ->
         if (playerDesignStyle == PlayerDesignStyle.V7) Pair(Color.White, Color.Black) else Pair(tb, ib)
     }
@@ -717,7 +593,7 @@ fun BottomSheetPlayer(
             }
             Color.Black.copy(alpha = 1f - fadeProgress)
         } else when (playerBackground) {
-            PlayerBackgroundStyle.BLUR, PlayerBackgroundStyle.GRADIENT -> {
+            PlayerBackgroundStyle.BLUR, PlayerBackgroundStyle.GRADIENT, PlayerBackgroundStyle.APPLE_MUSIC -> {
                 val progress = ((state.value - state.collapsedBound) / (state.expandedBound - state.collapsedBound))
                     .coerceIn(0f, 1f)
                 val fadeProgress = if (progress < 0.2f) {
@@ -885,30 +761,34 @@ fun BottomSheetPlayer(
                                 ),
                         ) {
                             enrichedMetadata?.let { metadata ->
-                                LittlePlayerContent(
-                                    mediaMetadata = metadata,
-                                    sliderPosition = sliderPosition,
-                                    positionMs = position,
-                                    durationMs = duration,
-                                    textColor = littleTextColor,
-                                    liked = currentSongLiked,
-                                    onCollapse = state::collapseSoft,
-                                    onToggleLike = playerConnection::toggleLike,
-                                    onExpandQueue = queueSheetState::expandSoft,
-                                    onMenuClick = {
-                                        menuState.show {
-                                            PlayerMenu(
-                                                mediaMetadata = metadata,
-                                                navController = navController,
-                                                playerBottomSheetState = state,
-                                                onShowDetailsDialog = {
-                                                    showDetailsDialog = true
-                                                },
-                                                onDismiss = menuState::dismiss
-                                            )
-                                        }
-                                    },
-                                )
+                                LandscapeLikeBox(modifier = Modifier.fillMaxSize()) {
+                                    LittlePlayerContent(
+                                        mediaMetadata = metadata,
+                                        sliderPosition = sliderPosition,
+                                        positionMs = position,
+                                        durationMs = duration,
+                                        textColor = littleTextColor,
+                                        liked = currentSongLiked,
+                                        onCollapse = state::collapseSoft,
+                                        onToggleLike = playerConnection::toggleLike,
+                                        onExpandQueue = queueSheetState::expandSoft,
+                                        onMenuClick = {
+                                            menuState.show {
+                                                PlayerMenu(
+                                                    mediaMetadata = metadata,
+                                                    navController = navController,
+                                                    playerBottomSheetState = state,
+                                                    onShowDetailsDialog = {
+                                                        bottomSheetPageState.show {
+                                                            ShowMediaInfo(metadata.id)
+                                                        }
+                                                    },
+                                                    onDismiss = menuState::dismiss
+                                                )
+                                            }
+                                        },
+                                    )
+                                }
                             }
                         }
                     }
@@ -1027,7 +907,9 @@ fun BottomSheetPlayer(
                                                     navController = navController,
                                                     playerBottomSheetState = state,
                                                     onShowDetailsDialog = {
-                                                        showDetailsDialog = true
+                                                        bottomSheetPageState.show {
+                                                            ShowMediaInfo(metadata.id)
+                                                        }
                                                     },
                                                     onDismiss = menuState::dismiss
                                                 )
@@ -1084,28 +966,26 @@ fun BottomSheetPlayer(
         }
 
         val queueOnBackgroundColor = if (useBlackBackground) Color.White else MaterialTheme.colorScheme.onSurface
-        val queueSurfaceColor = if (useBlackBackground) Color.Black else MaterialTheme.colorScheme.surface
-
-        val (queueTextButtonColor, queueIconButtonColor) = when (playerButtonsStyle) {
-            PlayerButtonsStyle.DEFAULT -> Pair(queueOnBackgroundColor, queueSurfaceColor)
-            PlayerButtonsStyle.SECONDARY -> Pair(MaterialTheme.colorScheme.secondary, MaterialTheme.colorScheme.onSecondary)
-            PlayerButtonsStyle.PRIMARY -> Pair(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.onPrimary)
-            PlayerButtonsStyle.TERTIARY -> Pair(MaterialTheme.colorScheme.tertiary, MaterialTheme.colorScheme.onTertiary)
-        }
 
         Queue(
             state = queueSheetState,
             playerBottomSheetState = state,
             navController = navController,
-            backgroundColor = if (useBlackBackground) Color.Black else MaterialTheme.colorScheme.surfaceContainer,
+            backgroundColor =
+            if (useBlackBackground) {
+                Color.Black
+            } else {
+                MaterialTheme.colorScheme.surfaceContainer
+            },
             onBackgroundColor = queueOnBackgroundColor,
             textBackgroundColor = TextBackgroundColor,
         )
 
+        // Lyrics BottomSheet - separate from Queue
         mediaMetadata?.let { metadata ->
             BottomSheet(
                 state = lyricsSheetState,
-                backgroundColor = Color.Unspecified,
+                background = { Box(modifier = Modifier.fillMaxSize()) },
                 onDismiss = { },
                 collapsedContent = { }
             ) {
@@ -1568,509 +1448,1305 @@ private fun Modifier.littlePlayerOverlayGestures(
     }
 }
 
-4. Create MiniPlayer.kt
-
-qw/app/src/main/java/com/huayin/music/ui/player/MiniPlayer.kt
-
-package com.huayin.music.ui.player
-
-import android.content.res.Configuration
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.basicMarquee
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
-import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.rememberDraggableState
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialShapes
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.toShape
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.media3.common.Player
-import coil.compose.AsyncImage
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import com.huayin.music.LocalPlayerConnection
-import com.huayin.music.R
-import com.huayin.music.constants.MiniPlayerHeight
-import com.huayin.music.extensions.togglePlayPause
-import com.huayin.music.models.MediaMetadata
-import com.huayin.music.playback.PlayerConnection
-import com.huayin.music.constants.SwipeSensitivityKey
-import com.huayin.music.constants.SwipeThumbnailKey
-import com.huayin.music.utils.rememberPreference
-import kotlin.math.absoluteValue
-import kotlin.math.roundToInt
-
 @Composable
-fun MiniPlayer(
-    position: Long,
-    duration: Long,
-    modifier: Modifier = Modifier,
-    pureBlack: Boolean = false,
+fun PlayerBackground(
+    playerBackground: PlayerBackgroundStyle,
+    mediaMetadata: MediaMetadata?,
+    gradientColors: List<Color>,
+    disableBlur: Boolean,
+    blurRadius: Float,
+    playerCustomImageUri: String,
+    playerCustomBlur: Float,
+    playerCustomContrast: Float,
+    playerCustomBrightness: Float
 ) {
-    val playerConnection = LocalPlayerConnection.current ?: return
-    val layoutDirection = LocalLayoutDirection.current
-    val coroutineScope = rememberCoroutineScope()
-    val swipeSensitivity by rememberPreference(SwipeSensitivityKey, 0.73f)
-    val swipeThumbnail by rememberPreference(SwipeThumbnailKey, true)
+    val effectiveBlurRadius = blurRadius.coerceIn(0f, 48f)
+    val shouldApplyBlur = !disableBlur && effectiveBlurRadius > 0f
+    Box(modifier = Modifier.fillMaxSize()) {
+        when (playerBackground) {
+            PlayerBackgroundStyle.BLUR -> {
+                AnimatedContent(
+                    targetState = mediaMetadata?.thumbnailUrl,
+                    transitionSpec = {
+                        fadeIn(tween(1000)) togetherWith fadeOut(tween(1000))
+                    },
+                    label = ""
+                ) { thumbnailUrl ->
+                    if (thumbnailUrl != null) {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            AsyncImage(
+                                model = thumbnailUrl,
+                                contentDescription = "Blurred background",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize().let {
+                                    if (shouldApplyBlur) it.blur(radius = effectiveBlurRadius.dp) else it
+                                }
+                            )
+                            val overlayStops = PlayerBackgroundColorUtils.buildBlurOverlayStops(gradientColors)
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Brush.verticalGradient(colorStops = overlayStops))
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Black.copy(alpha = 0.08f))
+                            )
+                        }
+                    }
+                }
+            }
 
-    SwipeableMiniPlayerBox(
-        modifier = modifier,
-        swipeSensitivity = swipeSensitivity,
-        swipeThumbnail = swipeThumbnail,
-        playerConnection = playerConnection,
-        layoutDirection = layoutDirection,
-        coroutineScope = coroutineScope,
-        pureBlack = pureBlack,
-        useLegacyBackground = false
-    ) { offsetX ->
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(64.dp)
-                .offset { IntOffset(offsetX.roundToInt(), 0) }
-                .clip(RoundedCornerShape(32.dp))
-                .background(
-                    color = MaterialTheme.colorScheme.surfaceContainer
+            PlayerBackgroundStyle.GRADIENT -> {
+                AnimatedContent(
+                    targetState = gradientColors,
+                    transitionSpec = {
+                        fadeIn(tween(1000)) togetherWith fadeOut(tween(1000))
+                    },
+                    label = ""
+                ) { colors ->
+                    if (colors.isNotEmpty()) {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            val gradientColorStops = if (colors.size >= 3) {
+                                arrayOf(
+                                    0.0f to colors[0].copy(alpha = 0.92f),
+                                    0.5f to colors[1].copy(alpha = 0.75f),
+                                    1.0f to colors[2].copy(alpha = 0.65f)
+                                )
+                            } else {
+                                arrayOf(
+                                    0.0f to colors[0].copy(alpha = 0.9f),
+                                    0.6f to colors[0].copy(alpha = 0.55f),
+                                    1.0f to Color.Black.copy(alpha = 0.7f)
+                                )
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Brush.verticalGradient(colorStops = gradientColorStops))
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Black.copy(alpha = 0.18f))
+                            )
+                        }
+                    }
+                }
+            }
+            
+            PlayerBackgroundStyle.APPLE_MUSIC -> {
+                AnimatedContent(
+                    targetState = gradientColors,
+                    transitionSpec = {
+                        fadeIn(tween(1200)) togetherWith fadeOut(tween(1200))
+                    },
+                    label = ""
+                ) { colors ->
+                    if (colors.isNotEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .drawWithCache {
+                                    val width = size.width
+                                    val height = size.height
+
+                                    val baseColor = Color(0xFF050505)
+
+                                    val color1 = colors.getOrElse(0) { Color.DarkGray }
+                                    val color2 = colors.getOrElse(1) { color1 }
+                                    val color3 = colors.getOrElse(2) { color2 }
+                                    val color4 = colors.getOrElse(3) { color1 }
+                                    val color5 = colors.getOrElse(4) { color2 }
+                                    val color6 = colors.getOrElse(5) { color3 }
+
+                                    val brush1 = Brush.radialGradient(
+                                        colors = listOf(
+                                            color1.copy(alpha = 0.8f),
+                                            color1.copy(alpha = 0.5f),
+                                            Color.Transparent
+                                        ),
+                                        center = Offset(width * 0.2f, height * 0.25f),
+                                        radius = width * 1.2f
+                                    )
+
+                                    val brush2 = Brush.radialGradient(
+                                        colors = listOf(
+                                            color2.copy(alpha = 0.75f),
+                                            color2.copy(alpha = 0.45f),
+                                            Color.Transparent
+                                        ),
+                                        center = Offset(width * 0.85f, height * 0.8f),
+                                        radius = width * 1.1f
+                                    )
+
+                                    val brush3 = Brush.radialGradient(
+                                        colors = listOf(
+                                            color3.copy(alpha = 0.7f),
+                                            color3.copy(alpha = 0.4f),
+                                            Color.Transparent
+                                        ),
+                                        center = Offset(width * 0.9f, height * 0.15f),
+                                        radius = width * 1.0f
+                                    )
+                                    
+                                    val brush4 = Brush.radialGradient(
+                                        colors = listOf(
+                                            color4.copy(alpha = 0.65f),
+                                            color4.copy(alpha = 0.35f),
+                                            Color.Transparent
+                                        ),
+                                        center = Offset(width * 0.1f, height * 0.9f),
+                                        radius = width * 1.0f
+                                    )
+                                    
+                                    val brush5 = Brush.radialGradient(
+                                        colors = listOf(
+                                            color5.copy(alpha = 0.6f),
+                                            color5.copy(alpha = 0.3f),
+                                            Color.Transparent
+                                        ),
+                                        center = Offset(width * 0.5f, height * 0.1f),
+                                        radius = width * 0.9f
+                                    )
+                                    
+                                    val brush6 = Brush.radialGradient(
+                                        colors = listOf(
+                                            color6.copy(alpha = 0.6f),
+                                            color6.copy(alpha = 0.3f),
+                                            Color.Transparent
+                                        ),
+                                        center = Offset(width * 0.5f, height * 0.95f),
+                                        radius = width * 0.9f
+                                    )
+
+                                    onDrawBehind {
+                                        drawRect(color = baseColor)
+                                        drawRect(brush = brush1)
+                                        drawRect(brush = brush2)
+                                        drawRect(brush = brush3)
+                                        drawRect(brush = brush4)
+                                        drawRect(brush = brush5)
+                                        drawRect(brush = brush6)
+                                    }
+                                }
+                        )
+                    }
+                }
+            }
+
+            else -> {}
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun StyledPlaybackSlider(
+    sliderStyle: SliderStyle,
+    value: Float,
+    valueRange: ClosedFloatingPointRange<Float>,
+    onValueChange: (Float) -> Unit,
+    onValueChangeFinished: () -> Unit,
+    activeColor: Color,
+    isPlaying: Boolean,
+    modifier: Modifier = Modifier
+) {
+    when (sliderStyle) {
+        SliderStyle.DEFAULT, SliderStyle.Standard -> {
+            Slider(
+                value = value,
+                valueRange = valueRange,
+                onValueChange = onValueChange,
+                onValueChangeFinished = onValueChangeFinished,
+                colors = PlayerSliderColors.standardSliderColors(activeColor),
+                modifier = modifier
+            )
+        }
+
+        SliderStyle.SQUIGGLY, SliderStyle.Wavy, SliderStyle.Circular -> {
+            SquigglySlider(
+                value = value,
+                valueRange = valueRange,
+                onValueChange = onValueChange,
+                onValueChangeFinished = onValueChangeFinished,
+                colors = PlayerSliderColors.wavySliderColors(activeColor),
+                modifier = modifier,
+                squigglesSpec = SquigglySlider.SquigglesSpec(
+                    amplitude = if (isPlaying) 2.dp else 0.dp,
+                    strokeWidth = 6.dp
                 )
-        ) {
-            NewMiniPlayerContent(
-                position = position,
-                duration = duration,
-                playerConnection = playerConnection
+            )
+        }
+
+        SliderStyle.SLIM, SliderStyle.Simple -> {
+            Slider(
+                value = value,
+                valueRange = valueRange,
+                onValueChange = onValueChange,
+                onValueChangeFinished = onValueChangeFinished,
+                colors = PlayerSliderColors.simpleSliderColors(activeColor),
+                thumb = { Spacer(modifier = Modifier.size(0.dp)) },
+                track = { sliderState ->
+                    PlayerSliderTrack(
+                        sliderState = sliderState,
+                        colors = PlayerSliderColors.simpleSliderColors(activeColor),
+                        trackHeight = 3.dp
+                    )
+                },
+                modifier = modifier
+            )
+        }
+        
+        SliderStyle.Thick -> {
+            Slider(
+                value = value,
+                valueRange = valueRange,
+                onValueChange = onValueChange,
+                onValueChangeFinished = onValueChangeFinished,
+                colors = PlayerSliderColors.thickSliderColors(activeColor),
+                thumb = { Spacer(modifier = Modifier.size(0.dp)) },
+                track = { sliderState ->
+                    PlayerSliderTrack(
+                        sliderState = sliderState,
+                        colors = PlayerSliderColors.thickSliderColors(activeColor),
+                        trackHeight = 12.dp
+                    )
+                },
+                modifier = modifier
             )
         }
     }
 }
 
 @Composable
-fun SwipeableMiniPlayerBox(
-    modifier: Modifier = Modifier,
-    swipeSensitivity: Float,
-    swipeThumbnail: Boolean,
-    playerConnection: PlayerConnection,
-    layoutDirection: LayoutDirection,
-    coroutineScope: CoroutineScope,
-    pureBlack: Boolean = false,
-    useLegacyBackground: Boolean = false,
-    content: @Composable (Float) -> Unit
+fun PlayerTimeLabel(
+    sliderPosition: Long?,
+    position: Long,
+    duration: Long,
+    textBackgroundColor: Color,
+    showRemainingTime: Boolean = false,
+    centerContent: @Composable (() -> Unit)? = null,
 ) {
-    val offsetXAnimatable = remember { Animatable(0f) }
-    var dragStartTime by remember { mutableStateOf(0L) }
-    var totalDragDistance by remember { mutableFloatStateOf(0f) }
-
-    val animationSpec = spring<Float>(
-        dampingRatio = Spring.DampingRatioNoBouncy,
-        stiffness = Spring.StiffnessLow
-    )
-
-    fun calculateAutoSwipeThreshold(swipeSensitivity: Float): Int {
-        return (600 / (1f + kotlin.math.exp(-(-11.44748 * swipeSensitivity + 9.04945)))).roundToInt()
-    }
-    val autoSwipeThreshold = calculateAutoSwipeThreshold(swipeSensitivity)
-
     Box(
-        modifier = modifier
+        modifier =
+        Modifier
             .fillMaxWidth()
-            .height(MiniPlayerHeight)
-            .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
-            .let { baseModifier ->
-                if (useLegacyBackground) {
-                    baseModifier.background(
-                        if (pureBlack) Color.Black
-                        else MaterialTheme.colorScheme.surfaceContainer
-                    )
+            .padding(horizontal = PlayerHorizontalPadding + 4.dp),
+    ) {
+        Text(
+            text = makeTimeString(sliderPosition ?: position),
+            style = MaterialTheme.typography.labelMedium,
+            color = textBackgroundColor,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.align(Alignment.CenterStart),
+        )
+
+        if (centerContent != null) {
+            Box(
+                modifier = Modifier.align(Alignment.Center),
+                contentAlignment = Alignment.Center,
+            ) {
+                centerContent()
+            }
+        }
+
+        Text(
+            text = if (duration != C.TIME_UNSET) {
+                if (showRemainingTime) {
+                    val remaining = duration - (sliderPosition ?: position)
+                    "-${makeTimeString(remaining.coerceAtLeast(0))}"
                 } else {
-                    baseModifier.padding(horizontal = 12.dp)
+                    makeTimeString(duration)
+                }
+            } else "",
+            style = MaterialTheme.typography.labelMedium,
+            color = textBackgroundColor,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.align(Alignment.CenterEnd),
+        )
+    }
+}
+
+@Composable
+fun PlayerPlaybackControls(
+    playerDesignStyle: PlayerDesignStyle,
+    playbackState: Int,
+    isPlaying: Boolean,
+    isLoading: Boolean,
+    repeatMode: Int,
+    canSkipPrevious: Boolean,
+    canSkipNext: Boolean,
+    textButtonColor: Color,
+    iconButtonColor: Color,
+    textBackgroundColor: Color,
+    icBackgroundColor: Color,
+    playPauseRoundness: androidx.compose.ui.unit.Dp,
+    playerConnection: PlayerConnection,
+    currentSongLiked: Boolean
+) {
+    val shuffleModeEnabled by playerConnection.shuffleModeEnabled.collectAsState()
+
+    when (playerDesignStyle) {
+        PlayerDesignStyle.V2 -> {
+            BoxWithConstraints(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                val maxW = maxWidth
+                val playButtonHeight = maxW / 6f
+                val playButtonWidth = playButtonHeight * 1.6f
+                val sideButtonHeight = playButtonHeight * 0.8f
+                val sideButtonWidth = sideButtonHeight * 1.3f
+
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+
+                    FilledTonalIconButton(
+                        onClick = playerConnection::seekToPrevious,
+                        enabled = canSkipPrevious,
+                        colors = IconButtonDefaults.filledTonalIconButtonColors(
+                            containerColor = textButtonColor,
+                            contentColor = iconButtonColor
+                        ),
+                        modifier = Modifier
+                            .size(width = sideButtonWidth, height = sideButtonHeight)
+                            .clip(RoundedCornerShape(32.dp))
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.skip_previous),
+                            contentDescription = null,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    FilledIconButton(
+                        onClick = {
+                            if (playbackState == STATE_ENDED) {
+                                playerConnection.player.seekTo(0, 0)
+                                playerConnection.player.playWhenReady = true
+                            } else {
+                                playerConnection.player.togglePlayPause()
+                            }
+                        },
+                        colors = IconButtonDefaults.filledIconButtonColors(
+                            containerColor = textButtonColor,
+                            contentColor = iconButtonColor
+                        ),
+                        modifier = Modifier
+                            .size(width = playButtonWidth, height = playButtonHeight)
+                            .clip(RoundedCornerShape(32.dp))
+                    ) {
+                        if (isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(42.dp),
+                                color = iconButtonColor,
+                            )
+                        } else {
+                            Icon(
+                                painter = painterResource(
+                                    when {
+                                        playbackState == STATE_ENDED -> R.drawable.replay
+                                        isPlaying -> R.drawable.pause
+                                        else -> R.drawable.play
+                                    }
+                                ),
+                                contentDescription = null,
+                                modifier = Modifier.size(42.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    FilledTonalIconButton(
+                        onClick = playerConnection::seekToNext,
+                        enabled = canSkipNext,
+                        colors = IconButtonDefaults.filledTonalIconButtonColors(
+                            containerColor = textButtonColor,
+                            contentColor = iconButtonColor
+                        ),
+                        modifier = Modifier
+                            .size(width = sideButtonWidth, height = sideButtonHeight)
+                            .clip(RoundedCornerShape(32.dp))
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.skip_next),
+                            contentDescription = null,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
                 }
             }
-            .let { baseModifier ->
-                if (swipeThumbnail) {
-                    baseModifier.pointerInput(Unit) {
-                        detectHorizontalDragGestures(
-                            onDragStart = {
-                                dragStartTime = System.currentTimeMillis()
-                                totalDragDistance = 0f
+        }
+
+        PlayerDesignStyle.V3 -> {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = PlayerHorizontalPadding)
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .clickable {
+                                playerConnection.player.shuffleModeEnabled = !shuffleModeEnabled
                             },
-                            onDragCancel = {
-                                coroutineScope.launch {
-                                    offsetXAnimatable.animateTo(
-                                        targetValue = 0f,
-                                        animationSpec = animationSpec
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.shuffle),
+                            contentDescription = null,
+                            tint = textBackgroundColor.copy(
+                                alpha = if (shuffleModeEnabled) 1f else 0.4f
+                            ),
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .size(52.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(textBackgroundColor.copy(alpha = 0.08f))
+                            .clickable(enabled = canSkipPrevious) {
+                                playerConnection.seekToPrevious()
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.skip_previous),
+                            contentDescription = null,
+                            tint = textBackgroundColor.copy(alpha = if (canSkipPrevious) 0.9f else 0.4f),
+                            modifier = Modifier.size(26.dp)
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .size(70.dp)
+                            .clip(RoundedCornerShape(50))
+                            .background(textBackgroundColor)
+                            .clickable {
+                                if (playbackState == STATE_ENDED) {
+                                    playerConnection.player.seekTo(0, 0)
+                                    playerConnection.player.playWhenReady = true
+                                } else {
+                                    playerConnection.player.togglePlayPause()
+                                }
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(32.dp),
+                                color = icBackgroundColor,
+                            )
+                        } else {
+                            Icon(
+                                painter = painterResource(
+                                    when {
+                                        playbackState == STATE_ENDED -> R.drawable.replay
+                                        isPlaying -> R.drawable.pause
+                                        else -> R.drawable.play
+                                    }
+                                ),
+                                contentDescription = null,
+                                tint = icBackgroundColor,
+                                modifier = Modifier.size(34.dp)
+                            )
+                        }
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .size(52.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(textBackgroundColor.copy(alpha = 0.08f))
+                            .clickable(enabled = canSkipNext) {
+                                playerConnection.seekToNext()
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.skip_next),
+                            contentDescription = null,
+                            tint = textBackgroundColor.copy(alpha = if (canSkipNext) 0.9f else 0.4f),
+                            modifier = Modifier.size(26.dp)
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .clickable { playerConnection.player.toggleRepeatMode() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(
+                                when (repeatMode) {
+                                    Player.REPEAT_MODE_OFF, Player.REPEAT_MODE_ALL -> R.drawable.repeat
+                                    Player.REPEAT_MODE_ONE -> R.drawable.repeat_one
+                                    else -> R.drawable.repeat
+                                }
+                            ),
+                            contentDescription = null,
+                            tint = textBackgroundColor.copy(
+                                alpha = if (repeatMode == Player.REPEAT_MODE_OFF) 0.4f else 1f
+                            ),
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                }
+            }
+        }
+
+        PlayerDesignStyle.V4 -> {
+            BoxWithConstraints(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = PlayerHorizontalPadding)
+            ) {
+                val baseLarge = 56.dp
+                val baseSmall = 46.dp
+                val baseGap = 12.dp
+                val baseLargeIcon = 28.dp
+                val baseSmallIcon = 22.dp
+                val baseLargeRadius = 18.dp
+                val baseSmallRadius = 16.dp
+                val centerSize = 88.dp
+                val centerPadding = 40.dp
+                val sideTotal = (maxWidth - centerSize - centerPadding) / 2f
+                val scale =
+                    ((sideTotal - baseGap) / (baseLarge + baseSmall)).coerceAtMost(1f).coerceAtLeast(0.6f)
+                val large = baseLarge * scale
+                val small = baseSmall * scale
+                val gap = baseGap * scale
+                val largeIcon = baseLargeIcon * scale
+                val smallIcon = baseSmallIcon * scale
+                val largeRadius = baseLargeRadius * scale
+                val smallRadius = baseSmallRadius * scale
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Surface(
+                            onClick = {
+                                playerConnection.player.shuffleModeEnabled = !shuffleModeEnabled
+                            },
+                            shape = RoundedCornerShape(smallRadius),
+                            color = textBackgroundColor.copy(
+                                alpha = if (shuffleModeEnabled) 0.2f else 0.08f
+                            ),
+                            modifier = Modifier.size(small)
+                        ) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.shuffle),
+                                    contentDescription = null,
+                                    tint = textBackgroundColor.copy(
+                                        alpha = if (shuffleModeEnabled) 1f else 0.6f
+                                    ),
+                                    modifier = Modifier.size(smallIcon)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(gap))
+
+                        Surface(
+                            onClick = { playerConnection.seekToPrevious() },
+                            enabled = canSkipPrevious,
+                            shape = RoundedCornerShape(largeRadius),
+                            color = textBackgroundColor.copy(alpha = 0.15f),
+                            modifier = Modifier.size(large)
+                        ) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.skip_previous),
+                                    contentDescription = null,
+                                    tint = textBackgroundColor.copy(
+                                        alpha = if (canSkipPrevious) 1f else 0.4f
+                                    ),
+                                    modifier = Modifier.size(largeIcon)
+                                )
+                            }
+                        }
+                    }
+
+                    Surface(
+                        onClick = {
+                            if (playbackState == STATE_ENDED) {
+                                playerConnection.player.seekTo(0, 0)
+                                playerConnection.player.playWhenReady = true
+                            } else {
+                                playerConnection.player.togglePlayPause()
+                            }
+                        },
+                        shape = RoundedCornerShape(28.dp),
+                        color = textButtonColor,
+                        modifier = Modifier
+                            .padding(horizontal = 20.dp)
+                            .size(88.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (isLoading) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(40.dp),
+                                    color = icBackgroundColor,
+                                )
+                            } else {
+                                Icon(
+                                    painter = painterResource(
+                                        when {
+                                            playbackState == STATE_ENDED -> R.drawable.replay
+                                            isPlaying -> R.drawable.pause
+                                            else -> R.drawable.play
+                                        }
+                                    ),
+                                    contentDescription = null,
+                                    tint = icBackgroundColor,
+                                    modifier = Modifier.size(44.dp)
+                                )
+                            }
+                        }
+                    }
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Surface(
+                            onClick = { playerConnection.seekToNext() },
+                            enabled = canSkipNext,
+                            shape = RoundedCornerShape(largeRadius),
+                            color = textBackgroundColor.copy(alpha = 0.15f),
+                            modifier = Modifier.size(large)
+                        ) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.skip_next),
+                                    contentDescription = null,
+                                    tint = textBackgroundColor.copy(
+                                        alpha = if (canSkipNext) 1f else 0.4f
+                                    ),
+                                    modifier = Modifier.size(largeIcon)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(gap))
+
+                        Surface(
+                            onClick = { playerConnection.player.toggleRepeatMode() },
+                            shape = RoundedCornerShape(smallRadius),
+                            color = textBackgroundColor.copy(
+                                alpha = if (repeatMode != Player.REPEAT_MODE_OFF) 0.2f else 0.08f
+                            ),
+                            modifier = Modifier.size(small)
+                        ) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    painter = painterResource(
+                                        when (repeatMode) {
+                                            Player.REPEAT_MODE_ONE -> R.drawable.repeat_one
+                                            else -> R.drawable.repeat
+                                        }
+                                    ),
+                                    contentDescription = null,
+                                    tint = textBackgroundColor.copy(
+                                        alpha = if (repeatMode == Player.REPEAT_MODE_OFF) 0.6f else 1f
+                                    ),
+                                    modifier = Modifier.size(smallIcon)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        PlayerDesignStyle.V1, PlayerDesignStyle.V5 -> {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = PlayerHorizontalPadding),
+            ) {
+                Box(modifier = Modifier.weight(1f)) {
+                    ResizableIconButton(
+                        icon = when (repeatMode) {
+                            Player.REPEAT_MODE_OFF, Player.REPEAT_MODE_ALL -> R.drawable.repeat
+                            Player.REPEAT_MODE_ONE -> R.drawable.repeat_one
+                            else -> throw IllegalStateException()
+                        },
+                        color = textBackgroundColor,
+                        modifier = Modifier
+                            .size(32.dp)
+                            .padding(4.dp)
+                            .align(Alignment.Center)
+                            .alpha(if (repeatMode == Player.REPEAT_MODE_OFF) 0.5f else 1f),
+                        onClick = {
+                            playerConnection.player.toggleRepeatMode()
+                        },
+                    )
+                }
+
+                Box(modifier = Modifier.weight(1f)) {
+                    ResizableIconButton(
+                        icon = R.drawable.skip_previous,
+                        enabled = canSkipPrevious,
+                        color = textBackgroundColor,
+                        modifier =
+                        Modifier
+                            .size(32.dp)
+                            .align(Alignment.Center),
+                        onClick = playerConnection::seekToPrevious,
+                    )
+                }
+
+                Spacer(Modifier.width(8.dp))
+
+                Box(
+                    modifier =
+                    Modifier
+                        .size(72.dp)
+                        .clip(RoundedCornerShape(playPauseRoundness))
+                        .background(textButtonColor)
+                        .clickable {
+                            if (playbackState == STATE_ENDED) {
+                                playerConnection.player.seekTo(0, 0)
+                                playerConnection.player.playWhenReady = true
+                            } else {
+                                playerConnection.player.togglePlayPause()
+                            }
+                        },
+                ) {
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .size(36.dp),
+                            color = iconButtonColor,
+                        )
+                    } else {
+                        Image(
+                            painter =
+                            painterResource(
+                                if (playbackState ==
+                                    STATE_ENDED
+                                ) {
+                                    R.drawable.replay
+                                } else if (isPlaying) {
+                                    R.drawable.pause
+                                } else {
+                                    R.drawable.play
+                                },
+                            ),
+                            contentDescription = null,
+                            colorFilter = ColorFilter.tint(iconButtonColor),
+                            modifier =
+                            Modifier
+                                .align(Alignment.Center)
+                                .size(36.dp),
+                        )
+                    }
+                }
+
+                Spacer(Modifier.width(8.dp))
+
+                Box(modifier = Modifier.weight(1f)) {
+                    ResizableIconButton(
+                        icon = R.drawable.skip_next,
+                        enabled = canSkipNext,
+                        color = textBackgroundColor,
+                        modifier =
+                        Modifier
+                            .size(32.dp)
+                            .align(Alignment.Center),
+                        onClick = playerConnection::seekToNext,
+                    )
+                }
+
+                Box(modifier = Modifier.weight(1f)) {
+                    ResizableIconButton(
+                        icon = if (currentSongLiked) R.drawable.favorite else R.drawable.favorite_border,
+                        color = if (currentSongLiked) MaterialTheme.colorScheme.error else textBackgroundColor,
+                        modifier =
+                        Modifier
+                            .size(32.dp)
+                            .padding(4.dp)
+                            .align(Alignment.Center),
+                        onClick = playerConnection::toggleLike,
+                    )
+                }
+            }
+        }
+
+        PlayerDesignStyle.V6 -> {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = PlayerHorizontalPadding)
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(28.dp),
+                    color = textBackgroundColor.copy(alpha = 0.08f),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(6.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Surface(
+                            onClick = { playerConnection.seekToPrevious() },
+                            enabled = canSkipPrevious,
+                            shape = RoundedCornerShape(
+                                topStart = 22.dp, bottomStart = 22.dp,
+                                topEnd = 8.dp, bottomEnd = 8.dp
+                            ),
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(56.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.skip_previous),
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSecondaryContainer.copy(
+                                        alpha = if (canSkipPrevious) 1f else 0.4f
+                                    ),
+                                    modifier = Modifier.size(28.dp)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(6.dp))
+
+                        Surface(
+                            onClick = {
+                                if (playbackState == STATE_ENDED) {
+                                    playerConnection.player.seekTo(0, 0)
+                                    playerConnection.player.playWhenReady = true
+                                } else {
+                                    playerConnection.player.togglePlayPause()
+                                }
+                            },
+                            shape = RoundedCornerShape(28.dp),
+                            color = textButtonColor,
+                            modifier = Modifier
+                                .size(width = 88.dp, height = 80.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (isLoading) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(40.dp),
+                                        color = iconButtonColor,
                                     )
-                                }
-                            },
-                            onHorizontalDrag = { _, dragAmount ->
-                                val adjustedDragAmount =
-                                    if (layoutDirection == LayoutDirection.Rtl) -dragAmount else dragAmount
-                                val canSkipPrevious = playerConnection.player.previousMediaItemIndex != -1
-                                val canSkipNext = playerConnection.player.nextMediaItemIndex != -1
-                                val allowLeft = adjustedDragAmount < 0 && canSkipNext
-                                val allowRight = adjustedDragAmount > 0 && canSkipPrevious
-                                if (allowLeft || allowRight) {
-                                    totalDragDistance += kotlin.math.abs(adjustedDragAmount)
-                                    coroutineScope.launch {
-                                        offsetXAnimatable.snapTo(offsetXAnimatable.value + adjustedDragAmount)
-                                    }
-                                }
-                            },
-                            onDragEnd = {
-                                val dragDuration = System.currentTimeMillis() - dragStartTime
-                                val velocity = if (dragDuration > 0) totalDragDistance / dragDuration else 0f
-                                val currentOffset = offsetXAnimatable.value
-
-                                val minDistanceThreshold = 50f
-                                val velocityThreshold = (swipeSensitivity * -8.25f) + 8.5f
-
-                                val shouldChangeSong = (
-                                        kotlin.math.abs(currentOffset) > minDistanceThreshold &&
-                                                velocity > velocityThreshold
-                                        ) || (kotlin.math.abs(currentOffset) > autoSwipeThreshold)
-
-                                if (shouldChangeSong) {
-                                    val isRightSwipe = currentOffset > 0
-                                    val canSkipPrevious = playerConnection.player.previousMediaItemIndex != -1
-                                    val canSkipNext = playerConnection.player.nextMediaItemIndex != -1
-
-                                    if (isRightSwipe && canSkipPrevious) {
-                                        playerConnection.player.seekToPreviousMediaItem()
-                                    } else if (!isRightSwipe && canSkipNext) {
-                                        playerConnection.player.seekToNext()
-                                    }
-                                }
-
-                                coroutineScope.launch {
-                                    offsetXAnimatable.animateTo(
-                                        targetValue = 0f,
-                                        animationSpec = animationSpec
+                                } else {
+                                    Icon(
+                                        painter = painterResource(
+                                            when {
+                                                playbackState == STATE_ENDED -> R.drawable.replay
+                                                isPlaying -> R.drawable.pause
+                                                else -> R.drawable.play
+                                            }
+                                        ),
+                                        contentDescription = null,
+                                        tint = iconButtonColor,
+                                        modifier = Modifier.size(44.dp)
                                     )
                                 }
                             }
-                        )
+                        }
+
+                        Spacer(modifier = Modifier.width(6.dp))
+
+                        Surface(
+                            onClick = { playerConnection.seekToNext() },
+                            enabled = canSkipNext,
+                            shape = RoundedCornerShape(
+                                topStart = 8.dp, bottomStart = 8.dp,
+                                topEnd = 22.dp, bottomEnd = 22.dp
+                            ),
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(56.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.skip_next),
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSecondaryContainer.copy(
+                                        alpha = if (canSkipNext) 1f else 0.4f
+                                    ),
+                                    modifier = Modifier.size(28.dp)
+                                )
+                            }
+                        }
                     }
-                } else {
-                    baseModifier
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Surface(
+                        onClick = {
+                            playerConnection.player.shuffleModeEnabled = !shuffleModeEnabled
+                        },
+                        shape = RoundedCornerShape(50),
+                        color = if (shuffleModeEnabled)
+                            MaterialTheme.colorScheme.tertiaryContainer
+                        else textBackgroundColor.copy(alpha = 0.08f),
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.shuffle),
+                                contentDescription = null,
+                                tint = if (shuffleModeEnabled)
+                                    MaterialTheme.colorScheme.onTertiaryContainer
+                                else textBackgroundColor.copy(alpha = 0.5f),
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    Surface(
+                        onClick = { playerConnection.player.toggleRepeatMode() },
+                        shape = RoundedCornerShape(50),
+                        color = if (repeatMode != Player.REPEAT_MODE_OFF)
+                            MaterialTheme.colorScheme.tertiaryContainer
+                        else textBackgroundColor.copy(alpha = 0.08f),
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(
+                                    when (repeatMode) {
+                                        Player.REPEAT_MODE_ONE -> R.drawable.repeat_one
+                                        else -> R.drawable.repeat
+                                    }
+                                ),
+                                contentDescription = null,
+                                tint = if (repeatMode != Player.REPEAT_MODE_OFF)
+                                    MaterialTheme.colorScheme.onTertiaryContainer
+                                else textBackgroundColor.copy(alpha = 0.5f),
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
                 }
             }
-    ) {
-        content(offsetXAnimatable.value)
+        }
 
-        // Visual indicator
-        if (offsetXAnimatable.value.absoluteValue > 50f) {
-            Box(
+        PlayerDesignStyle.V7 -> {
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .align(if (offsetXAnimatable.value > 0) Alignment.CenterStart else Alignment.CenterEnd)
-                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth()
+                    .padding(horizontal = PlayerHorizontalPadding)
             ) {
-                Icon(
-                    painter = painterResource(
-                        if (offsetXAnimatable.value > 0) R.drawable.skip_previous else R.drawable.skip_next
-                    ),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary.copy(
-                        alpha = (offsetXAnimatable.value.absoluteValue / autoSwipeThreshold).coerceIn(0f, 1f)
-                    ),
-                    modifier = Modifier.size(24.dp)
-                )
+                Surface(
+                    onClick = playerConnection::seekToPrevious,
+                    enabled = canSkipPrevious,
+                    shape = CircleShape,
+                    color = Color.Transparent,
+                    modifier = Modifier.size(64.dp)
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.skip_previous),
+                            contentDescription = null,
+                            tint = textBackgroundColor.copy(
+                                alpha = if (canSkipPrevious) 1f else 0.4f
+                            ),
+                            modifier = Modifier.size(44.dp)
+                        )
+                    }
+                }
+
+                Surface(
+                    onClick = {
+                        if (playbackState == STATE_ENDED) {
+                            playerConnection.player.seekTo(0, 0)
+                            playerConnection.player.playWhenReady = true
+                        } else {
+                            playerConnection.player.togglePlayPause()
+                        }
+                    },
+                    shape = CircleShape,
+                    color = Color.Transparent,
+                    modifier = Modifier.size(72.dp)
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(44.dp),
+                                color = textBackgroundColor,
+                            )
+                        } else {
+                            Icon(
+                                painter = painterResource(
+                                    when {
+                                        playbackState == STATE_ENDED -> R.drawable.replay
+                                        isPlaying -> R.drawable.pause
+                                        else -> R.drawable.play
+                                    }
+                                ),
+                                contentDescription = null,
+                                tint = textBackgroundColor,
+                                modifier = Modifier.size(52.dp)
+                            )
+                        }
+                    }
+                }
+
+                Surface(
+                    onClick = { playerConnection.seekToNext() },
+                    enabled = canSkipNext,
+                    shape = CircleShape,
+                    color = Color.Transparent,
+                    modifier = Modifier.size(64.dp)
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.skip_next),
+                            contentDescription = null,
+                            tint = textBackgroundColor.copy(
+                                alpha = if (canSkipNext) 1f else 0.4f
+                            ),
+                            modifier = Modifier.size(44.dp)
+                        )
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-fun RowScope.MiniPlayerInfo(
-    mediaMetadata: MediaMetadata
-) {
-    Column(
-        modifier = Modifier
-            .weight(1f)
-            .padding(horizontal = 12.dp),
-        verticalArrangement = Arrangement.Center
-    ) {
-        AnimatedContent(
-            targetState = mediaMetadata.title,
-            transitionSpec = { fadeIn() togetherWith fadeOut() },
-            label = "title"
-        ) { title ->
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.basicMarquee()
-            )
-        }
-
-        AnimatedContent(
-            targetState = mediaMetadata.artists,
-            transitionSpec = { fadeIn() togetherWith fadeOut() },
-            label = "artist"
-        ) { artists ->
-            Text(
-                text = artists.joinToString { it.name },
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.basicMarquee()
-            )
-        }
-    }
-}
-
-@Composable
-private fun MiniPlayerArtwork(
-    mediaMetadata: MediaMetadata?,
-    position: Long,
-    duration: Long,
-    isLoading: Boolean,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier.size(47.dp)
-    ) {
-        if (isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier.fillMaxSize(),
-                color = MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.18f)
-            )
-        } else {
-            CircularProgressIndicator(
-                progress = { if (duration > 0) (position.toFloat() / duration).coerceIn(0f, 1f) else 0f },
-                modifier = Modifier.fillMaxSize(),
-                color = MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.18f)
-            )
-        }
-
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .size(37.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-                .border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                    shape = CircleShape
-                )
-        ) {
-            val thumbnailUrl = mediaMetadata?.thumbnailUrl
-            if (thumbnailUrl != null) {
-                AsyncImage(
-                    model = thumbnailUrl,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-            } else {
-                Image(
-                    painter = painterResource(R.drawable.music_note),
-                    contentDescription = null,
-                    modifier = Modifier.size(22.dp)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun MiniPlayerTransportButton(
-    iconResId: Int,
-    contentDescription: String?,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    isPrimary: Boolean = false
-) {
-    val containerColor =
-        if (isPrimary) MaterialTheme.colorScheme.surface else Color.Transparent
-    val borderColor =
-        if (enabled) MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-        else MaterialTheme.colorScheme.outline.copy(alpha = 0.12f)
-    val iconTint =
-        if (enabled) MaterialTheme.colorScheme.onSurface
-        else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .then(modifier)
-            .size(if (isPrimary) 40.dp else 36.dp)
-            .clip(CircleShape)
-            .background(containerColor)
-            .border(width = 1.dp, color = borderColor, shape = CircleShape)
-            .clickable(enabled = enabled, onClick = onClick)
-    ) {
-        Icon(
-            painter = painterResource(iconResId),
-            contentDescription = contentDescription,
-            tint = iconTint,
-            modifier = Modifier.size(if (isPrimary) 22.dp else 18.dp)
-        )
-    }
-}
-
-@Composable
-private fun MiniPlayerTransportControls(
-    isPlaying: Boolean,
+fun PlayerControlsContent(
+    mediaMetadata: MediaMetadata,
+    playerDesignStyle: PlayerDesignStyle,
+    sliderStyle: SliderStyle,
     playbackState: Int,
+    isPlaying: Boolean,
+    isLoading: Boolean,
+    repeatMode: Int,
     canSkipPrevious: Boolean,
     canSkipNext: Boolean,
-    playerConnection: PlayerConnection
-) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        MiniPlayerTransportButton(
-            iconResId = R.drawable.skip_previous,
-            contentDescription = null,
-            onClick = playerConnection::seekToPrevious,
-            enabled = canSkipPrevious
-        )
-
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.size(40.dp)
-        ) {
-            MiniPlayerTransportButton(
-                iconResId = when {
-                    playbackState == Player.STATE_ENDED -> R.drawable.replay
-                    isPlaying -> R.drawable.pause
-                    else -> R.drawable.play
-                },
-                contentDescription = stringResource(
-                    if (playbackState == Player.STATE_ENDED || !isPlaying) R.string.play else R.string.play
-                ).let {
-                    if (isPlaying && playbackState != Player.STATE_ENDED) "Pause" else it
-                },
-                onClick = {
-                    if (playbackState == Player.STATE_ENDED) {
-                        playerConnection.player.seekTo(0, 0)
-                        playerConnection.player.playWhenReady = true
-                    } else {
-                        playerConnection.player.togglePlayPause()
-                    }
-                },
-                isPrimary = true
-            )
-        }
-
-        MiniPlayerTransportButton(
-            iconResId = R.drawable.skip_next,
-            contentDescription = null,
-            onClick = playerConnection::seekToNext,
-            enabled = canSkipNext
-        )
-    }
-}
-
-@Composable
-fun NewMiniPlayerContent(
+    textButtonColor: Color,
+    iconButtonColor: Color,
+    textBackgroundColor: Color,
+    icBackgroundColor: Color,
+    sliderPosition: Long?,
     position: Long,
     duration: Long,
-    playerConnection: PlayerConnection
+    playerConnection: PlayerConnection,
+    navController: NavController,
+    state: BottomSheetState,
+    menuState: MenuState,
+    bottomSheetPageState: BottomSheetPageState,
+    clipboardManager: ClipboardManager,
+    context: Context,
+    onSliderValueChange: (Long) -> Unit,
+    onSliderValueChangeFinished: () -> Unit,
+    currentFormat: FormatEntity? = null,
 ) {
-    val isPlaying by playerConnection.isPlaying.collectAsState()
-    val playbackState by playerConnection.playbackState.collectAsState()
-    val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
-    val canSkipPrevious by playerConnection.canSkipPrevious.collectAsState()
-    val canSkipNext by playerConnection.canSkipNext.collectAsState()
+    val currentSong by playerConnection.currentSong.collectAsState(initial = null)
+    val currentSongLiked = currentSong?.song?.liked == true
 
-    val isLoading = playbackState == Player.STATE_BUFFERING
+    val playPauseRoundness by animateDpAsState(
+        targetValue = if (isPlaying) 24.dp else 36.dp,
+        animationSpec = tween(durationMillis = 90, easing = LinearEasing),
+        label = "playPauseRoundness",
+    )
 
     Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 8.dp, vertical = 8.dp),
+            .fillMaxWidth()
+            .padding(horizontal = PlayerHorizontalPadding),
     ) {
-        MiniPlayerArtwork(
-            mediaMetadata = mediaMetadata,
-            position = position,
-            duration = duration,
-            isLoading = isLoading
-        )
-
-        Spacer(modifier = Modifier.width(5.dp))
-
-        mediaMetadata?.let {
-            MiniPlayerInfo(mediaMetadata = it)
-        } ?: Spacer(Modifier.weight(1f))
+        Column(modifier = Modifier.weight(1f)) {
+            PlayerTitleSection(
+                mediaMetadata = mediaMetadata,
+                textBackgroundColor = textBackgroundColor,
+                navController = navController,
+                state = state,
+                clipboardManager = clipboardManager,
+                context = context
+            )
+        }
 
         Spacer(modifier = Modifier.width(12.dp))
 
-        MiniPlayerTransportControls(
-            isPlaying = isPlaying,
-            playbackState = playbackState,
-            canSkipPrevious = canSkipPrevious,
-            canSkipNext = canSkipNext,
-            playerConnection = playerConnection
+        PlayerTopActions(
+            mediaMetadata = mediaMetadata,
+            playerDesignStyle = playerDesignStyle,
+            textButtonColor = textButtonColor,
+            iconButtonColor = iconButtonColor,
+            textBackgroundColor = textBackgroundColor,
+            playerConnection = playerConnection,
+            navController = navController,
+            menuState = menuState,
+            state = state,
+            bottomSheetPageState = bottomSheetPageState,
+            context = context,
+            currentSongLiked = currentSongLiked
         )
     }
+
+    Spacer(Modifier.height(12.dp))
+
+    StyledPlaybackSlider(
+        sliderStyle = sliderStyle,
+        value = (sliderPosition ?: position).toFloat(),
+        valueRange = 0f..duration.toFloat().coerceAtLeast(1f),
+        onValueChange = { onSliderValueChange(it.toLong()) },
+        onValueChangeFinished = onSliderValueChangeFinished,
+        activeColor = textButtonColor,
+        isPlaying = isPlaying,
+        modifier = Modifier.padding(horizontal = PlayerHorizontalPadding)
+    )
+
+    Spacer(Modifier.height(4.dp))
+
+    PlayerTimeLabel(
+        sliderPosition = sliderPosition,
+        position = position,
+        duration = duration,
+        textBackgroundColor = textBackgroundColor,
+        showRemainingTime = playerDesignStyle == PlayerDesignStyle.V7,
+        centerContent = if (playerDesignStyle == PlayerDesignStyle.V7 && currentFormat != null) {
+            {
+                val codec = currentFormat.mimeType.substringAfter("/").uppercase()
+                val label = when {
+                    codec.contains("FLAC") || codec.contains("ALAC") -> "Lossless"
+                    codec.contains("OPUS") -> codec
+                    codec.contains("AAC") -> codec
+                    codec.contains("MP4A") -> "AAC"
+                    codec.contains("VORBIS") -> "Vorbis"
+                    else -> codec
+                }
+                Surface(
+                    shape = RoundedCornerShape(4.dp),
+                    color = textBackgroundColor.copy(alpha = 0.12f),
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.graphic_eq),
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp),
+                            tint = textBackgroundColor.copy(alpha = 0.8f),
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = textBackgroundColor.copy(alpha = 0.8f),
+                        )
+                    }
+                }
+            }
+        } else null,
+    )
+
+    Spacer(Modifier.height(12.dp))
+
+    PlayerPlaybackControls(
+        playerDesignStyle = playerDesignStyle,
+        playbackState = playbackState,
+        isPlaying = isPlaying,
+        isLoading = isLoading,
+        repeatMode = repeatMode,
+        canSkipPrevious = canSkipPrevious,
+        canSkipNext = canSkipNext,
+        textButtonColor = textButtonColor,
+        iconButtonColor = iconButtonColor,
+        textBackgroundColor = textBackgroundColor,
+        icBackgroundColor = icBackgroundColor,
+        playPauseRoundness = playPauseRoundness,
+        playerConnection = playerConnection,
+        currentSongLiked = currentSongLiked
+    )
 }

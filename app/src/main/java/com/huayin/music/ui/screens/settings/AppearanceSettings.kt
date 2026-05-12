@@ -106,7 +106,7 @@ fun AppearanceSettings(
                 )},
                 { SwitchPreference(
                     title = { Text("Animate Lyrics") },
-                    icon = { Icon(painterResource(R.drawable.music_note), null) }, // Fixed Unresolved reference
+                    icon = { Icon(painterResource(R.drawable.music_note), null) },
                     checked = animateLyrics,
                     onCheckedChange = onAnimateLyricsChange
                 )}
@@ -173,9 +173,9 @@ fun SliderStyleSelectorBottomSheet(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         
-                        // Mock preview to ensure 100% compilation
+                        // Mock preview
                         when (style) {
-                            SliderStyle.DEFAULT -> {
+                            SliderStyle.DEFAULT, SliderStyle.Standard -> {
                                 Slider(
                                     value = 0.5f,
                                     onValueChange = {},
@@ -187,7 +187,7 @@ fun SliderStyleSelectorBottomSheet(
                                     )
                                 )
                             }
-                            SliderStyle.SQUIGGLY -> {
+                            SliderStyle.SQUIGGLY, SliderStyle.Wavy, SliderStyle.Circular -> {
                                 SquigglySlider(
                                     value = 0.5f,
                                     valueRange = 0f..1f,
@@ -204,7 +204,7 @@ fun SliderStyleSelectorBottomSheet(
                                     )
                                 )
                             }
-                            SliderStyle.SLIM -> {
+                            SliderStyle.SLIM, SliderStyle.Simple, SliderStyle.Thick -> {
                                 LinearProgressIndicator(
                                     progress = { 0.5f },
                                     modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),

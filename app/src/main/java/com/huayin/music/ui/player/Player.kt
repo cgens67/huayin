@@ -23,11 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.unit.Velocity
 import androidx.media3.common.Player
 import androidx.navigation.NavController
 import com.huayin.music.LocalPlayerConnection
@@ -78,8 +74,12 @@ fun BottomSheetPlayer(
     val smallButtonsShapeState by rememberPreference(SmallButtonsShapeKey, DefaultSmallButtonsShape)
     val playPauseShapeState by rememberPreference(PlayPauseButtonShapeKey, DefaultPlayPauseButtonShape)
     
-    val smallButtonsShape = remember(smallButtonsShapeState) { getSmallButtonShape(smallButtonsShapeState).toShape() }
-    val playPauseShape = remember(playPauseShapeState) { getPlayPauseShape(playPauseShapeState).toShape() }
+    // Extracted out of the remember block because toShape() is a composable call!
+    val smallButtonsPolygon = remember(smallButtonsShapeState) { getSmallButtonShape(smallButtonsShapeState) }
+    val smallButtonsShape = smallButtonsPolygon.toShape()
+    
+    val playPausePolygon = remember(playPauseShapeState) { getPlayPauseShape(playPauseShapeState) }
+    val playPauseShape = playPausePolygon.toShape()
 
     LaunchedEffect(playbackState) {
         if (playbackState == Player.STATE_READY) {
@@ -134,60 +134,11 @@ fun BottomSheetPlayer(
             },
             collapsedContent = { MiniPlayer(position = position, duration = duration) },
         ) {
-            val nestedScrollConnection = remember {
-                object : NestedScrollConnection {
-                    override fun onPreScroll(
-                        available: Offset,
-                        source: NestedScrollSource,
-                    ): Offset {
-                        if (queueBottomSheetState.isExpanded && available.y > 0) {
-                            queueBottomSheetState.dispatchRawDelta(available.y)
-                            return available
-                        }
-                        if (available.y < 0 && state.expandedBound != state.value) {
-                            return Offset.Zero
-                        }
-                        return queueBottomSheetState.preUpPostDownNestedScrollConnection.onPreScroll(
-                            available,
-                            source
-                        )
-                    }
-
-                    override fun onPostScroll(
-                        consumed: Offset,
-                        available: Offset,
-                        source: NestedScrollSource,
-                    ): Offset {
-                        return queueBottomSheetState.preUpPostDownNestedScrollConnection.onPostScroll(
-                            consumed,
-                            available,
-                            source
-                        )
-                    }
-
-                    override suspend fun onPreFling(available: Velocity): Velocity {
-                        return queueBottomSheetState.preUpPostDownNestedScrollConnection.onPreFling(
-                            available
-                        )
-                    }
-
-                    override suspend fun onPostFling(
-                        consumed: Velocity,
-                        available: Velocity,
-                    ): Velocity {
-                        return queueBottomSheetState.preUpPostDownNestedScrollConnection.onPostFling(
-                            consumed,
-                            available
-                        )
-                    }
-                }
-            }
-
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .fillMaxSize()
-                    .nestedScroll(nestedScrollConnection)
+                    .nestedScroll(queueBottomSheetState.preUpPostDownNestedScrollConnection) // Fixed Nested Scrolling
                     .verticalScroll(rememberScrollState())
                     .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Vertical))
             ) {
@@ -325,7 +276,7 @@ fun BottomSheetPlayer(
                     
                     ControlIcon(R.drawable.skip_previous, size = 52.dp, shape = smallButtonsShape) { playerConnection.seekToPrevious() }
 
-                    // Play/Pause (Large Shape)
+                    // Play/Pause (Dynamic Shape)
                     Surface(
                         onClick = { playerConnection.player.togglePlayPause() },
                         modifier = Modifier.size(80.dp),

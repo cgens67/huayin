@@ -3,13 +3,8 @@ package com.huayin.music.ui.player
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -62,13 +57,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -84,7 +77,6 @@ import com.huayin.music.constants.DarkModeKey
 import com.huayin.music.constants.MiniPlayerThumbnailShapeKey
 import com.huayin.music.constants.DefaultMiniPlayerThumbnailShape
 import com.huayin.music.constants.PureBlackKey
-import com.huayin.music.constants.ThumbnailCornerRadius
 import com.huayin.music.extensions.togglePlayPause
 import com.huayin.music.models.MediaMetadata
 import com.huayin.music.ui.screens.settings.DarkMode
@@ -112,7 +104,6 @@ fun MiniPlayer(
     val canSkipPrevious by playerConnection.canSkipPrevious.collectAsState()
     val currentSong by playerConnection.currentSong.collectAsState(initial = null)
 
-    // Obtener el estado del tema para calcular el color de fondo correcto
     val isSystemInDarkTheme = isSystemInDarkTheme()
     val darkTheme by rememberEnumPreference(DarkModeKey, defaultValue = DarkMode.AUTO)
     val pureBlack by rememberPreference(PureBlackKey, defaultValue = false)
@@ -121,7 +112,6 @@ fun MiniPlayer(
         if (darkTheme == DarkMode.AUTO) isSystemInDarkTheme else darkTheme == DarkMode.ON
     }
 
-    // Obtener la forma del thumbnail del MiniPlayer
     val miniPlayerThumbnailShapeState = rememberPreference(
         key = MiniPlayerThumbnailShapeKey,
         defaultValue = DefaultMiniPlayerThumbnailShape
@@ -131,17 +121,15 @@ fun MiniPlayer(
         if (isPlaying) {
             getMiniPlayerThumbnailShape(miniPlayerThumbnailShapeState.value)
         } else {
-            MaterialShapes.Circle
+            MaterialShapes.Square
         }
     }
 
-    // Calcular el color de fondo correcto
     val miniPlayerBackgroundColor = when {
         useDarkTheme && pureBlack -> Color.Black.copy(alpha = 0.95f)
         else -> MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.95f)
     }
 
-    val currentView = LocalView.current
     val layoutDirection = LocalLayoutDirection.current
     val coroutineScope = rememberCoroutineScope()
 
@@ -164,20 +152,8 @@ fun MiniPlayer(
         animationSpec = animationSpec
     )
 
+    val currentThumbnailShape = miniPlayerThumbnailShape.toShape()
 
-    // Convertir RoundedPolygon a Shape usando la API oficial
-    // Cambia a Square cuando está en pausa, usa la forma seleccionada cuando está reproduciendo
-    val currentThumbnailShape = remember(isPlaying, miniPlayerThumbnailShape) {
-        if (isPlaying) {
-            miniPlayerThumbnailShape
-        } else {
-            MaterialShapes.Square
-        }
-    }.toShape()
-
-    /**
-     * Calculates the auto-swipe threshold based on swipe sensitivity.
-     */
     fun calculateAutoSwipeThreshold(swipeSensitivity: Float): Int {
         return (600 / (1f + exp(-(-11.44748 * swipeSensitivity + 9.04945)))).roundToInt()
     }

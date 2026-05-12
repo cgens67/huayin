@@ -29,6 +29,9 @@ fun AppearanceSettings(
     val (smallButtonsShape, onSmallButtonsShapeChange) = rememberPreference(SmallButtonsShapeKey, DefaultSmallButtonsShape)
     val (miniPlayerShape, onMiniPlayerShapeChange) = rememberPreference(MiniPlayerThumbnailShapeKey, DefaultMiniPlayerThumbnailShape)
 
+    val (lyricsPosition, onLyricsPositionChange) = rememberEnumPreference(LyricsTextPositionKey, LyricsPosition.CENTER)
+    val (animateLyrics, onAnimateLyricsChange) = rememberPreference(AnimateLyricsKey, true)
+
     var showSliderStyleSheet by remember { mutableStateOf(false) }
 
     SettingsPage(
@@ -79,7 +82,7 @@ fun AppearanceSettings(
                 )},
                 { PreferenceEntry(
                     title = { Text("Seek Bar Style") },
-                    description = sliderStyle.name.lowercase().capitalize(),
+                    description = sliderStyle.name.lowercase().replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
                     icon = { Icon(painterResource(R.drawable.sliders), null) },
                     onClick = { showSliderStyleSheet = true }
                 )},
@@ -90,11 +93,29 @@ fun AppearanceSettings(
         SettingsGeneralCategory(
             title = "Personalization",
             items = listOf(
-                { LanguagePreference() }
+                { LanguagePreference() },
+                { EnumListPreference(
+                    title = { Text("Lyrics Alignment") },
+                    icon = { Icon(painterResource(R.drawable.format_align_center), null) },
+                    selectedValue = lyricsPosition,
+                    onValueSelected = onLyricsPositionChange,
+                    valueText = { it.name }
+                )},
+                { SwitchPreference(
+                    title = { Text("Animate Lyrics") },
+                    icon = { Icon(painterResource(R.drawable.animation), null) },
+                    checked = animateLyrics,
+                    onCheckedChange = onAnimateLyricsChange
+                )}
             )
         )
 
-        AvatarSelector(modifier = Modifier.padding(16.dp))
+        AvatarSelector(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 32.dp)
+        )
     }
 
     if (showSliderStyleSheet) {
@@ -121,7 +142,9 @@ fun SliderStyleSelectorBottomSheet(
         containerColor = MaterialTheme.colorScheme.surface,
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, bottom = 32.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, bottom = 32.dp)
         ) {
             Text(
                 text = "Seek Bar Style",
@@ -130,7 +153,7 @@ fun SliderStyleSelectorBottomSheet(
                 modifier = Modifier.padding(bottom = 16.dp)
             )
             
-            SliderStyle.values().forEach { style ->
+            SliderStyle.entries.forEach { style ->
                 val isSelected = style == selectedStyle
                 Card(
                     onClick = { onStyleSelected(style) },
@@ -141,7 +164,7 @@ fun SliderStyleSelectorBottomSheet(
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = style.name.lowercase().capitalize(),
+                            text = style.name.lowercase().replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
                             fontWeight = FontWeight.Bold,
                             color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
                         )

@@ -82,7 +82,6 @@ import com.huayin.music.constants.MiniPlayerHeight
 import com.huayin.music.extensions.togglePlayPause
 import com.huayin.music.models.MediaMetadata
 import com.huayin.music.playback.PlayerConnection
-import com.huayin.music.constants.SwipeSensitivityKey
 import com.huayin.music.constants.SwipeThumbnailKey
 import com.huayin.music.utils.rememberPreference
 import kotlin.math.absoluteValue

@@ -40,7 +40,6 @@ import kotlinx.coroutines.delay
 @Composable
 fun Thumbnail(
     sliderPositionProvider: () -> Long?,
-    onOpenFullscreenLyrics: () -> Unit,
     modifier: Modifier = Modifier,
     isPlayerExpanded: Boolean = true,
 ) {
@@ -142,7 +141,6 @@ fun Thumbnail(
                                 .fillMaxSize()
                                 .pointerInput(Unit) {
                                     detectTapGestures(
-                                        onTap = { onOpenFullscreenLyrics() },
                                         onDoubleTap = { offset ->
                                             if (offset.x < size.toPx() / 2) {
                                                 playerConnection.player.seekBack()
@@ -168,9 +166,9 @@ fun Thumbnail(
                                     AsyncImage(
                                         model = ImageRequest.Builder(LocalContext.current)
                                             .data(item?.mediaMetadata?.artworkUri?.toString())
-                                            .memoryCachePolicy(CachePolicy.ENABLED)
-                                            .diskCachePolicy(CachePolicy.ENABLED)
-                                            .networkCachePolicy(CachePolicy.ENABLED)
+                                            .memoryCachePolicy(coil.request.CachePolicy.ENABLED)
+                                            .diskCachePolicy(coil.request.CachePolicy.ENABLED)
+                                            .networkCachePolicy(coil.request.CachePolicy.ENABLED)
                                             .build(),
                                         contentDescription = null,
                                         contentScale = ContentScale.Crop,

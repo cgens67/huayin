@@ -65,10 +65,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -92,8 +90,8 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -106,14 +104,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -122,7 +118,6 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.media3.common.C
 import androidx.media3.common.Player
-import androidx.media3.common.Player.STATE_ENDED
 import coil.compose.AsyncImage
 import com.huayin.music.LocalDatabase
 import com.huayin.music.LocalPlayerConnection
@@ -158,18 +153,13 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.saket.squiggles.SquigglySlider
-import kotlin.math.exp
-import kotlin.math.roundToInt
-import kotlin.time.Duration.Companion.seconds
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.offset
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.platform.LocalLayoutDirection
-import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
-import kotlin.math.exp
 import kotlin.math.roundToInt
 
 @RequiresApi(Build.VERSION_CODES.M)
@@ -291,7 +281,7 @@ fun Lyrics(
 
     val textBackgroundColor = when (playerBackground) {
         PlayerBackgroundStyle.DEFAULT -> MaterialTheme.colorScheme.onBackground
-        PlayerBackgroundStyle.BLUR, PlayerBackgroundStyle.GRADIENT, PlayerBackgroundStyle.APPLE_MUSIC -> Color.White
+        else -> Color.White
     }
 
     val primaryColor = MaterialTheme.colorScheme.primary
@@ -313,7 +303,6 @@ fun Lyrics(
 
             withContext(Dispatchers.IO) {
                 try {
-
                     val fallbackColors = listOf(primaryColor, secondaryColor, tertiaryColor)
                     gradientColorsCache[currentMetadata.id] = fallbackColors
                     withContext(Dispatchers.Main) { gradientColors = fallbackColors }
@@ -651,20 +640,17 @@ fun Lyrics(
                     PlayerBackgroundStyle.APPLE_MUSIC -> {
                         Box(modifier = Modifier.fillMaxSize()) {
                             if (gradientColors.isNotEmpty()) {
-                                // Sophisticated blurred gradient background
                                 val color1 = gradientColors[0]
                                 val color2 = gradientColors.getOrElse(1) { gradientColors[0].copy(alpha = 0.8f) }
                                 val color3 = gradientColors.getOrElse(2) { gradientColors[0].copy(alpha = 0.6f) }
 
                                 androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize().blur(100.dp)) {
-                                    // Main vertical gradient base
                                     drawRect(
                                         brush = androidx.compose.ui.graphics.Brush.verticalGradient(
                                             listOf(color1, color2, color3)
                                         )
                                     )
 
-                                    // Multiple circular "color blobs" for a dynamic feel
                                     drawCircle(
                                         brush = androidx.compose.ui.graphics.Brush.radialGradient(
                                             colors = listOf(color1, Color.Transparent),
@@ -696,7 +682,6 @@ fun Lyrics(
                                     )
                                 }
 
-                                // Dark overlay for text readability
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
@@ -705,17 +690,14 @@ fun Lyrics(
                             }
                         }
                     }
-                    PlayerBackgroundStyle.DEFAULT -> {
-                        // DEFAULT background
+                    else -> {
+                        // DEFAULT background or others
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.3f))
+                        )
                     }
-                }
-
-                if (playerBackground != PlayerBackgroundStyle.DEFAULT) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.3f))
-                    )
                 }
             }
         }
@@ -778,10 +760,9 @@ fun Lyrics(
                                         horizontalAlignment = Alignment.CenterHorizontally,
                                         verticalArrangement = Arrangement.spacedBy(16.dp)
                                     ) {
-                                        androidx.compose.material3.ContainedLoadingIndicator(
+                                        androidx.compose.material3.CircularProgressIndicator(
                                             modifier = Modifier.size(56.dp),
-                                            containerColor = expressiveAccent.copy(alpha = 0.15f),
-                                            indicatorColor = expressiveAccent
+                                            color = expressiveAccent
                                         )
 
                                     }
@@ -963,7 +944,7 @@ fun Lyrics(
 
                                         val minDistanceThreshold = 50f
                                         val velocityThreshold = (0.73f * -8.25f) + 8.5f
-                                        val autoSwipeThreshold = calculateAutoSwipeThreshold(0.73f)
+                                        val autoSwipeThreshold = (600 / (1f + kotlin.math.exp(-(-11.44748 * 0.73f + 9.04945)))).roundToInt()
 
                                         val shouldChangeSong = (
                                                 currentOffset.absoluteValue > minDistanceThreshold &&
@@ -1130,7 +1111,7 @@ fun Lyrics(
                         }
                     }
 
-                    // Right side - Action buttons (sin cambios)
+                    // Right side - Action buttons
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -1190,7 +1171,7 @@ fun Lyrics(
 
                 // Slider
                 when (sliderStyle) {
-                    SliderStyle.DEFAULT -> {
+                    SliderStyle.DEFAULT, SliderStyle.Standard -> {
                         Slider(
                             value = (sliderPosition ?: position).toFloat(),
                             valueRange = 0f..(if (duration == C.TIME_UNSET) 0f else duration.toFloat()),
@@ -1210,7 +1191,7 @@ fun Lyrics(
                         )
                     }
 
-                    SliderStyle.SQUIGGLY -> {
+                    SliderStyle.SQUIGGLY, SliderStyle.Wavy, SliderStyle.Circular -> {
                         SquigglySlider(
                             value = (sliderPosition ?: position).toFloat(),
                             valueRange = 0f..(if (duration == C.TIME_UNSET) 0f else duration.toFloat()),
@@ -1235,7 +1216,7 @@ fun Lyrics(
                         )
                     }
 
-                    SliderStyle.SLIM -> {
+                    SliderStyle.SLIM, SliderStyle.Simple, SliderStyle.Thick -> {
                         Slider(
                             value = (sliderPosition ?: position).toFloat(),
                             valueRange = 0f..(if (duration == C.TIME_UNSET) 0f else duration.toFloat()),
@@ -1564,7 +1545,7 @@ private fun ShareLyricsDialog(
  * Calculates the auto-swipe threshold based on swipe sensitivity.
  */
 private fun calculateAutoSwipeThreshold(swipeSensitivity: Float): Int {
-    return (600 / (1f + exp(-(-11.44748 * swipeSensitivity + 9.04945)))).roundToInt()
+    return (600 / (1f + kotlin.math.exp(-(-11.44748 * swipeSensitivity + 9.04945)))).roundToInt()
 }
 
 // Preview time constant

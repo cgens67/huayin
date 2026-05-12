@@ -29,6 +29,7 @@ import com.huayin.music.constants.QuickPicksKey
 import com.huayin.music.constants.SYSTEM_DEFAULT
 import com.huayin.music.constants.TopSize
 import com.huayin.music.ui.component.EditTextPreference
+import com.huayin.music.ui.component.EnumListPreference
 import com.huayin.music.ui.component.ListPreference
 import com.huayin.music.ui.component.SettingsGeneralCategory
 import com.huayin.music.ui.component.SettingsPage
@@ -37,7 +38,6 @@ import com.huayin.music.ui.component.SwitchPreference
 import com.huayin.music.utils.rememberEnumPreference
 import com.huayin.music.utils.rememberPreference
 import java.net.Proxy
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -182,6 +182,13 @@ fun ContentSettings(
                     checked = enableKugou,
                     onCheckedChange = onEnableKugouChange,
                 )},
+                {EnumListPreference(
+                    title = { Text("Preferred Provider") },
+                    icon = { Icon(painterResource(R.drawable.lyrics), null) },
+                    selectedValue = preferredProvider,
+                    onValueSelected = onPreferredProviderChange,
+                    valueText = { it.name }
+                )}
             )
         )
 

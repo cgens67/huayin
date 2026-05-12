@@ -6,6 +6,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.huayin.music.R
@@ -25,8 +26,10 @@ fun AppearanceSettings(
     val (pureBlack, onPureBlackChange) = rememberPreference(PureBlackKey, false)
     val (sliderStyle, onSliderStyleChange) = rememberEnumPreference(SliderStyleKey, SliderStyle.SQUIGGLY)
     
-    val smallButtonsShape by rememberPreference(SmallButtonsShapeKey, DefaultSmallButtonsShape)
-    val miniPlayerShape by rememberPreference(MiniPlayerThumbnailShapeKey, DefaultMiniPlayerThumbnailShape)
+    val (smallButtonsShape, onSmallButtonsShapeChange) = rememberPreference(SmallButtonsShapeKey, DefaultSmallButtonsShape)
+    val (miniPlayerShape, onMiniPlayerShapeChange) = rememberPreference(MiniPlayerThumbnailShapeKey, DefaultMiniPlayerThumbnailShape)
+
+    var showSliderStyleSheet by remember { mutableStateOf(false) }
 
     SettingsPage(
         title = stringResource(R.string.appearance),
@@ -71,17 +74,16 @@ fun AppearanceSettings(
                 { UnifiedShapeSelectorButton(
                     smallButtonsShape = smallButtonsShape,
                     miniPlayerShape = miniPlayerShape,
-                    onSmallButtonsShapeSelected = { /* Logic */ },
-                    onMiniPlayerShapeSelected = { /* Logic */ }
+                    onSmallButtonsShapeSelected = onSmallButtonsShapeChange,
+                    onMiniPlayerShapeSelected = onMiniPlayerShapeChange
                 )},
-                { EnumListPreference(
+                { PreferenceEntry(
                     title = { Text("Seek Bar Style") },
+                    description = sliderStyle.name.lowercase().capitalize(),
                     icon = { Icon(painterResource(R.drawable.sliders), null) },
-                    selectedValue = sliderStyle,
-                    onValueSelected = onSliderStyleChange,
-                    valueText = { it.name.lowercase().capitalize() }
+                    onClick = { showSliderStyleSheet = true }
                 )},
-                { ThumbnailCornerRadiusSelectorButton { /* Logic */ } }
+                { ThumbnailCornerRadiusSelectorButton { /* Value is saved directly inside the component */ } }
             )
         )
 
@@ -94,9 +96,70 @@ fun AppearanceSettings(
 
         AvatarSelector(modifier = Modifier.padding(16.dp))
     }
+
+    if (showSliderStyleSheet) {
+        SliderStyleSelectorBottomSheet(
+            selectedStyle = sliderStyle,
+            onStyleSelected = {
+                onSliderStyleChange(it)
+                showSliderStyleSheet = false
+            },
+            onDismiss = { showSliderStyleSheet = false }
+        )
+    }
 }
 
-// RESTORING MISSING ENUMS TO PREVENT COMPILER CRASHES
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SliderStyleSelectorBottomSheet(
+    selectedStyle: SliderStyle,
+    onStyleSelected: (SliderStyle) -> Unit,
+    onDismiss: () -> Unit
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surface,
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, bottom = 32.dp)
+        ) {
+            Text(
+                text = "Seek Bar Style",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+            
+            SliderStyle.values().forEach { style ->
+                val isSelected = style == selectedStyle
+                Card(
+                    onClick = { onStyleSelected(style) },
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
+                    )
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = style.name.lowercase().capitalize(),
+                            fontWeight = FontWeight.Bold,
+                            color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        // Preview
+                        com.huayin.music.ui.screens.settings.EnhancedProgressBar(
+                            position = 5000,
+                            duration = 10000,
+                            isPlaying = true,
+                            sliderStyle = style
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
 enum class DarkMode { ON, OFF, AUTO }
 enum class NavigationTab { HOME, EXPLORE, LIBRARY }
 enum class LyricsPosition { LEFT, CENTER, RIGHT }

@@ -1,4 +1,3 @@
-// File: huayin-main/app/src/main/java/com/huayin/music/ui/player/Thumbnail.kt
 package com.huayin.music.ui.player
 
 import androidx.compose.animation.AnimatedVisibility

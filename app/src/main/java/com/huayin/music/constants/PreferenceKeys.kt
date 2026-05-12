@@ -20,6 +20,11 @@ enum class SliderStyle {
     DEFAULT,
     SQUIGGLY,
     SLIM,
+    Standard,
+    Wavy,
+    Thick,
+    Circular,
+    Simple
 }
 
 const val SYSTEM_DEFAULT = "SYSTEM_DEFAULT"
@@ -131,6 +136,24 @@ const val DefaultMiniPlayerThumbnailShape = "Circle"
 
 val HasSeenWelcomeKey = booleanPreferencesKey("has_seen_welcome")
 val AgreedToPrivacyPolicyKey = booleanPreferencesKey("agreed_to_privacy_policy")
+
+// Added properties for New Player Designs
+val PlayerDesignStyleKey = stringPreferencesKey("player_design_style")
+enum class PlayerDesignStyle { V1, V2, V3, V4, V5, V6, V7 }
+
+val PlayerCustomImageUriKey = stringPreferencesKey("player_custom_image_uri")
+val PlayerCustomBlurKey = floatPreferencesKey("player_custom_blur")
+val PlayerCustomContrastKey = floatPreferencesKey("player_custom_contrast")
+val PlayerCustomBrightnessKey = floatPreferencesKey("player_custom_brightness")
+val DisableBlurKey = booleanPreferencesKey("disable_blur")
+val BlurRadiusKey = floatPreferencesKey("blur_radius")
+val SeekExtraSeconds = booleanPreferencesKey("seek_extra_seconds")
+val SwipeSensitivityKey = floatPreferencesKey("swipe_sensitivity")
+val HidePlayerThumbnailKey = booleanPreferencesKey("hide_player_thumbnail")
+val CropThumbnailToSquareKey = booleanPreferencesKey("crop_thumbnail_to_square")
+val ArchiveTuneCanvasKey = booleanPreferencesKey("archive_tune_canvas")
+val MaxCanvasCacheSizeKey = intPreferencesKey("max_canvas_cache_size")
+val ThumbnailCornerRadiusKey = floatPreferencesKey("thumbnail_corner_radius")
 
 enum class LibraryViewType {
     LIST,
@@ -280,11 +303,16 @@ enum class PlayerBackgroundStyle {
     GRADIENT,
     BLUR,
     APPLE_MUSIC,
+    COLORING,
+    BLUR_GRADIENT,
+    CUSTOM,
+    GLOW,
+    GLOW_ANIMATED
 }
-
 
 enum class PlayerButtonsStyle {
     DEFAULT,
+    SECONDARY,
     PRIMARY,
     TERTIARY
 }

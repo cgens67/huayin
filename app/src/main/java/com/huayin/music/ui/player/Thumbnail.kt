@@ -166,9 +166,9 @@ fun Thumbnail(
                                     AsyncImage(
                                         model = ImageRequest.Builder(LocalContext.current)
                                             .data(item?.mediaMetadata?.artworkUri?.toString())
-                                            .memoryCachePolicy(coil.request.CachePolicy.ENABLED)
-                                            .diskCachePolicy(coil.request.CachePolicy.ENABLED)
-                                            .networkCachePolicy(coil.request.CachePolicy.ENABLED)
+                                            .memoryCachePolicy(CachePolicy.ENABLED)
+                                            .diskCachePolicy(CachePolicy.ENABLED)
+                                            .networkCachePolicy(CachePolicy.ENABLED)
                                             .build(),
                                         contentDescription = null,
                                         contentScale = ContentScale.Crop,

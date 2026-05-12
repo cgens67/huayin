@@ -1,4 +1,3 @@
-// File: huayin-main/app/src/main/java/com/huayin/music/ui/screens/settings/SettingsScreen.kt
 package com.huayin.music.ui.screens.settings
 
 import android.annotation.SuppressLint
@@ -208,6 +207,19 @@ fun SettingsScreen(
             SupportDevelopmentScreen()
         }
     }
+
+    // Top App bar placed to draw on top of content to properly apply scrollBehavior 
+    TopAppBar(
+        title = { Text(stringResource(R.string.settings), fontWeight = FontWeight.Bold) },
+        navigationIcon = {
+            IconButton(onClick = { navController.navigateUp() }) {
+                Icon(painterResource(R.drawable.arrow_back), null)
+            }
+        },
+        modifier = Modifier.clip(RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp)),
+        scrollBehavior = scrollBehavior,
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f))
+    )
 }
 
 @Composable

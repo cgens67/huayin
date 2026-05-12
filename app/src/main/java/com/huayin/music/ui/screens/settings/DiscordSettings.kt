@@ -196,7 +196,7 @@ fun DiscordSettings(
             )
         )
 
-        // Banner informativo mejorado
+        // Banner informativo
         AnimatedVisibility(
             visible = !infoDismissed,
             enter = fadeIn(),
@@ -248,7 +248,7 @@ fun DiscordSettings(
             }
         }
 
-        // Sección de cuenta mejorada
+        // Sección de cuenta
         PreferenceGroupTitle(title = stringResource(R.string.account))
 
         Card(
@@ -350,7 +350,6 @@ fun DiscordSettings(
             isEnabled = isLoggedIn && discordRPC,
         )
 
-        // Preview mejorado
         PreferenceGroupTitle(title = stringResource(R.string.preview))
 
         EnhancedRichPresence(
@@ -391,7 +390,6 @@ fun EnhancedRichPresence(
 ) {
     val context = LocalContext.current
 
-    // Animación para el gradiente
     val gradientAlpha by animateFloatAsState(
         targetValue = if (song != null) 0.15f else 0f,
         animationSpec = tween(durationMillis = 600, easing = FastOutSlowInEasing),
@@ -408,7 +406,6 @@ fun EnhancedRichPresence(
         )
     ) {
         Box {
-            // Fondo con gradiente sutil
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -427,15 +424,12 @@ fun EnhancedRichPresence(
                 modifier = Modifier.padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Header - Rediseñado
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Logo y título mejorados
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        // Logo con contenedor circular y gradiente
                         Box(
                             modifier = Modifier
                                 .size(48.dp)
@@ -481,7 +475,6 @@ fun EnhancedRichPresence(
                         }
                     }
 
-                    // Indicador de reproducción mejorado
                     if (song != null && isPlaying) {
                         Surface(
                             shape = RoundedCornerShape(16.dp),
@@ -496,7 +489,6 @@ fun EnhancedRichPresence(
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                // Icono de play animado
                                 Icon(
                                     painter = painterResource(R.drawable.play),
                                     contentDescription = null,
@@ -518,12 +510,10 @@ fun EnhancedRichPresence(
 
                 Spacer(Modifier.height(20.dp))
 
-                // Contenido principal
                 Row(
                     verticalAlignment = Alignment.Top,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    // Thumbnail con diseño mejorado
                     Box(
                         modifier = Modifier
                             .size(120.dp)
@@ -548,7 +538,6 @@ fun EnhancedRichPresence(
                                     contentScale = ContentScale.Crop
                                 )
 
-                                // Overlay sutil
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
@@ -562,13 +551,11 @@ fun EnhancedRichPresence(
                                         )
                                 )
 
-                                // Avatar del artista mejorado
                                 Box(
                                     modifier = Modifier
                                         .align(Alignment.BottomEnd)
                                         .padding(8.dp)
                                 ) {
-                                    // Logo de OpenTune como fallback mejorado
                                     val artistAvatar = song?.artists?.firstOrNull()?.thumbnailUrl
 
                                     Card(
@@ -591,7 +578,6 @@ fun EnhancedRichPresence(
                                                     contentScale = ContentScale.Crop
                                                 )
                                             } else {
-                                                // Logo de OpenTune con estilo mejorado
                                                 Box(
                                                     modifier = Modifier
                                                         .fillMaxSize()
@@ -624,7 +610,6 @@ fun EnhancedRichPresence(
 
                     Spacer(Modifier.width(16.dp))
 
-                    // Información de la canción
                     Column(
                         modifier = Modifier.weight(1f)
                     ) {
@@ -660,7 +645,6 @@ fun EnhancedRichPresence(
                     }
                 }
 
-                // Barra de progreso mejorada
                 if (song != null) {
                     Spacer(Modifier.height(20.dp))
 
@@ -674,18 +658,16 @@ fun EnhancedRichPresence(
 
                 Spacer(Modifier.height(20.dp))
 
-                // Botones de acción mejorados
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // Botón YouTube Music mejorado
                     FilledTonalButton(
                         enabled = song != null,
                         onClick = {
                             val intent = Intent(
                                 Intent.ACTION_VIEW,
-                                "https://music.youtube.com/watch?v=${song?.id}".toUri()
+                                "https://music.youtube.com/watch?v=${song?.song?.id}".toUri()
                             )
                             context.startActivity(intent)
                         },
@@ -703,7 +685,6 @@ fun EnhancedRichPresence(
                         Text("YouTube Music", maxLines = 1, fontWeight = FontWeight.Medium)
                     }
 
-                    // Botón OpenTune mejorado
                     OutlinedButton(
                         onClick = {
                             val intent = Intent(
@@ -758,7 +739,7 @@ fun EnhancedProgressBar(
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         when (sliderStyle) {
-            SliderStyle.DEFAULT -> {
+            SliderStyle.DEFAULT, SliderStyle.Standard -> {
                 Slider(
                     value = position.toFloat(),
                     valueRange = 0f..duration.toFloat().coerceAtLeast(1f),
@@ -774,7 +755,7 @@ fun EnhancedProgressBar(
                 )
             }
 
-            SliderStyle.SQUIGGLY -> {
+            SliderStyle.SQUIGGLY, SliderStyle.Wavy, SliderStyle.Circular -> {
                 SquigglySlider(
                     value = position.toFloat(),
                     valueRange = 0f..duration.toFloat().coerceAtLeast(1f),
@@ -794,7 +775,7 @@ fun EnhancedProgressBar(
                 )
             }
 
-            SliderStyle.SLIM -> {
+            SliderStyle.SLIM, SliderStyle.Simple, SliderStyle.Thick -> {
                 LinearProgressIndicator(
                     progress = { (position.toFloat() / duration.toFloat().coerceAtLeast(1f)) },
                     modifier = Modifier

@@ -598,17 +598,8 @@ fun BottomSheetPlayer(
                 else -> false
             }
         },
-        backgroundColor = if (playerDesignStyle == PlayerDesignStyle.V7) {
-            val progress = ((state.value - state.collapsedBound) / (state.expandedBound - state.collapsedBound))
-                .coerceIn(0f, 1f)
-            val fadeProgress = if (progress < 0.2f) {
-                ((0.2f - progress) / 0.2f).coerceIn(0f, 1f)
-            } else {
-                0f
-            }
-            Color.Black.copy(alpha = 1f - fadeProgress)
-        } else when (playerBackground) {
-            PlayerBackgroundStyle.BLUR, PlayerBackgroundStyle.GRADIENT, PlayerBackgroundStyle.APPLE_MUSIC -> {
+        background = {
+            val bgColor = if (playerDesignStyle == PlayerDesignStyle.V7) {
                 val progress = ((state.value - state.collapsedBound) / (state.expandedBound - state.collapsedBound))
                     .coerceIn(0f, 1f)
                 val fadeProgress = if (progress < 0.2f) {
@@ -616,22 +607,34 @@ fun BottomSheetPlayer(
                 } else {
                     0f
                 }
-                MaterialTheme.colorScheme.surface.copy(alpha = 1f - fadeProgress)
-            }
-            else -> {
-                val progress = ((state.value - state.collapsedBound) / (state.expandedBound - state.collapsedBound))
-                    .coerceIn(0f, 1f)
-                val fadeProgress = if (progress < 0.2f) {
-                    ((0.2f - progress) / 0.2f).coerceIn(0f, 1f)
-                } else {
-                    0f
-                }
-                if (useBlackBackground) {
-                    Color.Black.copy(alpha = 1f - fadeProgress)
-                } else {
+                Color.Black.copy(alpha = 1f - fadeProgress)
+            } else when (playerBackground) {
+                PlayerBackgroundStyle.BLUR, PlayerBackgroundStyle.GRADIENT, PlayerBackgroundStyle.APPLE_MUSIC -> {
+                    val progress = ((state.value - state.collapsedBound) / (state.expandedBound - state.collapsedBound))
+                        .coerceIn(0f, 1f)
+                    val fadeProgress = if (progress < 0.2f) {
+                        ((0.2f - progress) / 0.2f).coerceIn(0f, 1f)
+                    } else {
+                        0f
+                    }
                     MaterialTheme.colorScheme.surface.copy(alpha = 1f - fadeProgress)
                 }
+                else -> {
+                    val progress = ((state.value - state.collapsedBound) / (state.expandedBound - state.collapsedBound))
+                        .coerceIn(0f, 1f)
+                    val fadeProgress = if (progress < 0.2f) {
+                        ((0.2f - progress) / 0.2f).coerceIn(0f, 1f)
+                    } else {
+                        0f
+                    }
+                    if (useBlackBackground) {
+                        Color.Black.copy(alpha = 1f - fadeProgress)
+                    } else {
+                        MaterialTheme.colorScheme.surface.copy(alpha = 1f - fadeProgress)
+                    }
+                }
             }
+            Box(Modifier.fillMaxSize().background(bgColor))
         },
         onDismiss = {
             playerConnection.player.stop()

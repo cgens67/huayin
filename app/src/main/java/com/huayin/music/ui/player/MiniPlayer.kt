@@ -77,6 +77,7 @@ import com.huayin.music.constants.DarkModeKey
 import com.huayin.music.constants.MiniPlayerThumbnailShapeKey
 import com.huayin.music.constants.DefaultMiniPlayerThumbnailShape
 import com.huayin.music.constants.PureBlackKey
+import com.huayin.music.constants.ThumbnailCornerRadius
 import com.huayin.music.extensions.togglePlayPause
 import com.huayin.music.models.MediaMetadata
 import com.huayin.music.ui.screens.settings.DarkMode

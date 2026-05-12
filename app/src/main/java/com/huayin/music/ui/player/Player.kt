@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package com.huayin.music.ui.player
 
 import android.content.ClipData
@@ -11,157 +13,195 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.*
-import androidx.compose.foundation.gestures.*
-import androidx.compose.foundation.interaction.*
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.with
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.*
-import androidx.compose.ui.draw.*
-import androidx.compose.ui.focus.*
-import androidx.compose.ui.geometry.*
-import androidx.compose.ui.graphics.*
-import androidx.compose.ui.input.key.*
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.input.pointer.*
-import androidx.compose.ui.layout.*
-import androidx.compose.ui.platform.*
-import androidx.compose.ui.res.*
-import androidx.compose.ui.semantics.*
-import androidx.compose.ui.text.*
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.Layout
+import android.net.Uri
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isShiftPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.*
-import androidx.compose.ui.unit.*
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.toBitmap
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.floatPreferencesKey
-import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.media3.common.C
-import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
 import androidx.media3.common.Player.STATE_BUFFERING
 import androidx.media3.common.Player.STATE_ENDED
 import androidx.media3.common.Player.STATE_READY
-import androidx.navigation.NavController
 import androidx.palette.graphics.Palette
+import androidx.navigation.NavController
+import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.imageLoader
 import coil.request.ImageRequest
 import com.huayin.music.LocalDownloadUtil
 import com.huayin.music.LocalPlayerConnection
 import com.huayin.music.R
-import com.huayin.music.constants.*
-import com.huayin.music.db.entities.FormatEntity
-import com.huayin.music.db.entities.Song
-import com.huayin.music.extensions.metadata
-import com.huayin.music.extensions.toMediaItem
+import com.huayin.music.constants.DarkModeKey
+import com.huayin.music.constants.PlayerDesignStyle
+import com.huayin.music.constants.PlayerDesignStyleKey
+import com.huayin.music.constants.PlayerBackgroundStyle
+import com.huayin.music.constants.PlayerBackgroundStyleKey
+import com.huayin.music.constants.PlayerCustomImageUriKey
+import com.huayin.music.constants.PlayerCustomBlurKey
+import com.huayin.music.constants.PlayerCustomContrastKey
+import com.huayin.music.constants.PlayerCustomBrightnessKey
+import com.huayin.music.constants.DisableBlurKey
+import com.huayin.music.constants.BlurRadiusKey
+import com.huayin.music.constants.PlayerButtonsStyle
+import com.huayin.music.constants.PlayerButtonsStyleKey
+import com.huayin.music.ui.theme.PlayerBackgroundColorUtils
+import com.huayin.music.ui.theme.PlayerColorExtractor
+import com.huayin.music.ui.theme.PlayerSliderColors
+import com.huayin.music.constants.PlayerHorizontalPadding
+import com.huayin.music.constants.QueuePeekHeight
+import com.huayin.music.constants.SliderStyle
+import com.huayin.music.constants.SliderStyleKey
 import com.huayin.music.extensions.togglePlayPause
 import com.huayin.music.extensions.toggleRepeatMode
+import com.huayin.music.db.entities.FormatEntity
+import com.huayin.music.extensions.metadata
 import com.huayin.music.models.MediaMetadata
-import com.huayin.music.playback.PlayerConnection
-import com.huayin.music.ui.component.*
+import com.huayin.music.ui.component.BottomSheet
+import com.huayin.music.ui.component.BigSeekBar
+import com.huayin.music.ui.component.BottomSheetState
+import com.huayin.music.ui.component.LocalBottomSheetPageState
+import com.huayin.music.ui.component.LocalMenuState
+import com.huayin.music.ui.component.BottomSheetPageState
+import com.huayin.music.ui.component.MenuState
+import com.huayin.music.ui.component.PlayerSliderTrack
+import com.huayin.music.ui.component.ResizableIconButton
+import com.huayin.music.ui.component.rememberBottomSheetState
+import com.huayin.music.ui.component.IconButton
 import com.huayin.music.ui.menu.PlayerMenu
 import com.huayin.music.ui.screens.settings.DarkMode
-import com.huayin.music.ui.theme.PlayerColorExtractor
-import com.huayin.music.utils.getPlayPauseShape
-import com.huayin.music.utils.getSmallButtonShape
 import com.huayin.music.utils.makeTimeString
 import com.huayin.music.utils.rememberEnumPreference
 import com.huayin.music.utils.rememberPreference
-import kotlinx.coroutines.*
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.withContext
 import me.saket.squiggles.SquigglySlider
+import com.huayin.music.playback.PlayerConnection
 import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
-import android.net.Uri
 
 private const val SeekbarSettleToleranceMs = 1_500L
 private const val V7BackdropBlurHeightFraction = 0.54f
 
-internal val SwipeSensitivityKey = floatPreferencesKey("swipe_sensitivity")
-internal val SwipeThumbnailKey = booleanPreferencesKey("swipe_thumbnail")
-internal val HidePlayerThumbnailKey = booleanPreferencesKey("hide_player_thumbnail")
-internal val CropThumbnailToSquareKey = booleanPreferencesKey("crop_thumbnail_to_square")
-internal val SeekExtraSeconds = booleanPreferencesKey("seek_extra_seconds")
-internal val PlayerDesignStyleKey = stringPreferencesKey("player_design_style")
-internal val PlayerCustomImageUriKey = stringPreferencesKey("player_custom_image_uri")
-internal val PlayerCustomBlurKey = floatPreferencesKey("player_custom_blur")
-internal val PlayerCustomContrastKey = floatPreferencesKey("player_custom_contrast")
-internal val PlayerCustomBrightnessKey = floatPreferencesKey("player_custom_brightness")
-internal val DisableBlurKey = booleanPreferencesKey("disable_blur")
-internal val BlurRadiusKey = floatPreferencesKey("blur_radius")
-internal val ThumbnailCornerRadiusKey = floatPreferencesKey("thumbnail_corner_radius")
+internal val SwipeSensitivityKey = com.huayin.music.constants.SwipeSensitivityKey
+internal val SwipeThumbnailKey = com.huayin.music.constants.SwipeThumbnailKey
+internal val HidePlayerThumbnailKey = com.huayin.music.constants.HidePlayerThumbnailKey
+internal val CropThumbnailToSquareKey = com.huayin.music.constants.CropThumbnailToSquareKey
+internal val SeekExtraSeconds = com.huayin.music.constants.SeekExtraSeconds
 
-enum class PlayerDesignStyle { V1, V2, V3, V4, V5, V6, V7 }
-
-object PlayerBackgroundColorUtils {
-    fun buildBlurOverlayStops(gradientColors: List<Color>): Array<Pair<Float, Color>> {
-        return arrayOf(
-            0.0f to Color.Transparent,
-            0.5f to Color.Black.copy(alpha = 0.2f),
-            1.0f to Color.Black.copy(alpha = 0.7f)
-        )
-    }
-
-    fun buildColoringStops(baseColor: Color): Array<Pair<Float, Color>> {
-        return arrayOf(
-            0.0f to baseColor.copy(alpha = 0.8f),
-            1.0f to Color.Black.copy(alpha = 0.8f)
-        )
-    }
-
-    fun buildBlurGradientStops(gradientColors: List<Color>): Array<Pair<Float, Color>> {
-        val c1 = gradientColors.getOrElse(0) { Color.DarkGray }
-        val c2 = gradientColors.getOrElse(1) { Color.Black }
-        return arrayOf(
-            0.0f to c1.copy(alpha = 0.5f),
-            1.0f to c2.copy(alpha = 0.8f)
-        )
-    }
-
-    fun ensureComfortableColor(color: Color): Color = color
-}
-
-object PlayerSliderColors {
-    @Composable
-    fun standardSliderColors(activeColor: Color) = SliderDefaults.colors(
-        activeTrackColor = activeColor,
-        inactiveTrackColor = activeColor.copy(alpha = 0.3f),
-        thumbColor = activeColor
-    )
-    @Composable
-    fun wavySliderColors(activeColor: Color) = SliderDefaults.colors(
-        activeTrackColor = activeColor,
-        inactiveTrackColor = activeColor.copy(alpha = 0.3f),
-        thumbColor = activeColor
-    )
-    @Composable
-    fun thickSliderColors(activeColor: Color) = SliderDefaults.colors(
-        activeTrackColor = activeColor,
-        inactiveTrackColor = activeColor.copy(alpha = 0.3f),
-        thumbColor = Color.Transparent
-    )
-    @Composable
-    fun circularSliderColors(activeColor: Color) = SliderDefaults.colors(
-        activeTrackColor = activeColor,
-        inactiveTrackColor = activeColor.copy(alpha = 0.3f),
-        thumbColor = activeColor
-    )
-    @Composable
-    fun simpleSliderColors(activeColor: Color) = SliderDefaults.colors(
-        activeTrackColor = activeColor,
-        inactiveTrackColor = activeColor.copy(alpha = 0.3f),
-        thumbColor = Color.Transparent
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomSheetPlayer(
     state: BottomSheetState,
@@ -181,7 +221,7 @@ fun BottomSheetPlayer(
         key = PlayerDesignStyleKey,
         defaultValue = PlayerDesignStyle.V4
     )
-    
+
     val playerBackground by rememberEnumPreference(
         key = PlayerBackgroundStyleKey,
         defaultValue = PlayerBackgroundStyle.DEFAULT
@@ -191,14 +231,14 @@ fun BottomSheetPlayer(
     val (playerCustomBlur) = rememberPreference(PlayerCustomBlurKey, 0f)
     val (playerCustomContrast) = rememberPreference(PlayerCustomContrastKey, 1f)
     val (playerCustomBrightness) = rememberPreference(PlayerCustomBrightnessKey, 1f)
-    
+
     val (disableBlur) = rememberPreference(DisableBlurKey, false)
     val (blurRadius) = rememberPreference(BlurRadiusKey, 36f)
-    val (showCodecOnPlayer) = rememberPreference(androidx.datastore.preferences.core.booleanPreferencesKey("show_codec_on_player"), false)
+    val (showCodecOnPlayer) = rememberPreference(booleanPreferencesKey("show_codec_on_player"), false)
     val (incrementalSeekSkipEnabled) = rememberPreference(SeekExtraSeconds, defaultValue = false)
-    
-    val pureBlack by rememberPreference(PureBlackKey, defaultValue = false)
-    
+
+    val pureBlack by rememberPreference(com.huayin.music.constants.PureBlackKey, defaultValue = false)
+
     var keyboardSkipMultiplier by remember { mutableStateOf(1) }
     var lastKeyboardTapTime by remember { mutableLongStateOf(0L) }
 
@@ -212,7 +252,7 @@ fun BottomSheetPlayer(
     val useDarkTheme = remember(darkTheme, isSystemInDarkTheme) {
         if (darkTheme == DarkMode.AUTO) isSystemInDarkTheme else darkTheme == DarkMode.ON
     }
-    
+
     val onBackgroundColor = when (playerBackground) {
         PlayerBackgroundStyle.DEFAULT -> MaterialTheme.colorScheme.secondary
         else ->
@@ -221,7 +261,7 @@ fun BottomSheetPlayer(
             else
                 MaterialTheme.colorScheme.onPrimary
     }
-    
+
     val useBlackBackground =
         remember(isSystemInDarkTheme, darkTheme, pureBlack) {
             val useDark =
@@ -258,21 +298,21 @@ fun BottomSheetPlayer(
     var isUserSeeking by remember(mediaMetadata?.id) {
         mutableStateOf(false)
     }
-    
+
     val isLoading = playbackState == STATE_BUFFERING || sliderPosition != null
 
     var gradientColors by remember {
         mutableStateOf<List<Color>>(emptyList())
     }
-    
+
     var previousThumbnailUrl by remember { mutableStateOf<String?>(null) }
     var previousGradientColors by remember { mutableStateOf<List<Color>>(emptyList()) }
-    
+
     val gradientColorsCache = remember { mutableMapOf<String, List<Color>>() }
 
     val defaultGradientColors = listOf(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surfaceVariant)
     val fallbackColor = MaterialTheme.colorScheme.surface.toArgb()
-    
+
     LaunchedEffect(mediaMetadata?.id) {
         val currentThumbnail = mediaMetadata?.thumbnailUrl
         if (currentThumbnail != previousThumbnailUrl) {
@@ -280,7 +320,7 @@ fun BottomSheetPlayer(
             previousGradientColors = gradientColors
         }
     }
-    
+
     LaunchedEffect(mediaMetadata?.id, playerBackground) {
         if (playerBackground == PlayerBackgroundStyle.GRADIENT || playerBackground == PlayerBackgroundStyle.COLORING || playerBackground == PlayerBackgroundStyle.BLUR_GRADIENT || playerBackground == PlayerBackgroundStyle.GLOW || playerBackground == PlayerBackgroundStyle.GLOW_ANIMATED || playerBackground == PlayerBackgroundStyle.APPLE_MUSIC) {
             val currentMetadata = mediaMetadata
@@ -392,7 +432,7 @@ fun BottomSheetPlayer(
                 val isTransitioning = playerConnection.player.currentMediaItem?.mediaId != mediaMetadata?.id
                 val currentPlayerPosition = playerConnection.player.currentPosition
                 val currentPlayerDuration = playerConnection.player.duration
-                
+
                 if (isTransitioning) {
                     val elapsedSinceStart = SystemClock.elapsedRealtime() - startTime
                     position = elapsedSinceStart
@@ -447,7 +487,7 @@ fun BottomSheetPlayer(
         collapsedBound = dismissedBound,
         initialAnchor = 0
     )
-    
+
     val lyricsSheetState = rememberBottomSheetState(
         dismissedBound = 0.dp,
         expandedBound = state.expandedBound,
@@ -496,7 +536,7 @@ fun BottomSheetPlayer(
                 Column(
                     modifier = Modifier
                         .sizeIn(minWidth = 280.dp, maxWidth = 560.dp)
-                        .verticalScroll(rememberScrollState()),
+                        .padding(horizontal = 16.dp)
                 ) {
                     listOf(
                         stringResource(R.string.song_title) to mediaMetadata?.title,
@@ -609,7 +649,7 @@ fun BottomSheetPlayer(
                 }
                 Color.Black.copy(alpha = 1f - fadeProgress)
             } else when (playerBackground) {
-                PlayerBackgroundStyle.BLUR, PlayerBackgroundStyle.GRADIENT, PlayerBackgroundStyle.APPLE_MUSIC -> {
+                PlayerBackgroundStyle.BLUR, PlayerBackgroundStyle.GRADIENT, PlayerBackgroundStyle.APPLE_MUSIC, PlayerBackgroundStyle.COLORING, PlayerBackgroundStyle.BLUR_GRADIENT, PlayerBackgroundStyle.CUSTOM, PlayerBackgroundStyle.GLOW, PlayerBackgroundStyle.GLOW_ANIMATED -> {
                     val progress = ((state.value - state.collapsedBound) / (state.expandedBound - state.collapsedBound))
                         .coerceIn(0f, 1f)
                     val fadeProgress = if (progress < 0.2f) {
@@ -668,6 +708,11 @@ fun BottomSheetPlayer(
         val seekEnabled = duration > 0L && duration != C.TIME_UNSET
         val updatedOnSliderValueChange by rememberUpdatedState(onSliderValueChange)
         val updatedOnSliderValueChangeFinished by rememberUpdatedState(onSliderValueChangeFinished)
+
+        val nextUpMetadata =
+            remember(queueWindows, currentWindowIndex) {
+                queueWindows.getOrNull(currentWindowIndex + 1)?.mediaItem?.metadata
+            }
 
         val enrichedMetadata = remember(mediaMetadata, currentSong) {
             val meta = mediaMetadata ?: return@remember null
@@ -1097,7 +1142,7 @@ fun BottomSheetPlayer(
                             )
                         )
                 ) {
-                    Lyrics(
+                    com.huayin.music.ui.component.Lyrics(
                         sliderPositionProvider = { sliderPosition },
                         onNavigateBack = { lyricsSheetState.collapseSoft() },
                         mediaMetadata = metadata,
@@ -1850,127 +1895,6 @@ fun PlayerBackground(
                 }
             }
 
-            PlayerBackgroundStyle.GLOW_ANIMATED -> {
-                AnimatedContent(
-                    targetState = gradientColors,
-                    transitionSpec = {
-                        fadeIn(tween(1200)) togetherWith fadeOut(tween(1200))
-                    },
-                    label = "GlowAnimatedContent"
-                ) { colors ->
-                    if (colors.isNotEmpty()) {
-                        val infiniteTransition = rememberInfiniteTransition(label = "GlowAnimation")
-
-                        val progress by infiniteTransition.animateFloat(
-                            initialValue = 0f,
-                            targetValue = 1f,
-                            animationSpec = infiniteRepeatable(
-                                animation = tween(20000, easing = LinearEasing),
-                                repeatMode = RepeatMode.Restart
-                            ),
-                            label = "glowProgress"
-                        )
-
-                        fun rotatedColorAt(index: Int): Color {
-                            val size = colors.size
-                            val idx = index.toFloat() + progress * size
-                            val a = kotlin.math.floor(idx).toInt() % size
-                            val b = (a + 1) % size
-                            val frac = idx - kotlin.math.floor(idx)
-                            return androidx.compose.ui.graphics.lerp(colors.getOrElse(a) { Color.DarkGray }, colors.getOrElse(b) { Color.DarkGray }, frac)
-                        }
-
-                        fun oscillate(min: Float, max: Float, phase: Float, speed: Float = 1f): Float {
-                            // speed MUST be an integer to ensure seamless looping when progress wraps from 1f to 0f.
-                            val v = kotlin.math.sin(2f * kotlin.math.PI.toFloat() * (progress * speed + phase)).toFloat()
-                            return min + (max - min) * ((v + 1f) * 0.5f)
-                        }
-
-                        val color1 = rotatedColorAt(0)
-                        val color2 = rotatedColorAt(1)
-                        val color3 = rotatedColorAt(2)
-                        val color4 = rotatedColorAt(3)
-                        val color5 = rotatedColorAt(4)
-                        val color6 = rotatedColorAt(5)
-
-                        val o1x = oscillate(0.0f, 1.0f, 0.00f, 1.0f)
-                        val o1y = oscillate(0.0f, 0.5f, 0.07f, 1.0f)
-                        val r1 = oscillate(0.8f, 1.6f, 0.12f, 1.0f)
-
-                        val o2x = oscillate(1.0f, 0.0f, 0.2f, 1.0f)
-                        val o2y = oscillate(0.5f, 1.0f, 0.25f, 1.0f)
-                        val r2 = oscillate(0.7f, 1.5f, 0.18f, 1.0f)
-
-                        val o3x = oscillate(0.2f, 0.8f, 0.33f, 1.0f)
-                        val o3y = oscillate(0.8f, 0.2f, 0.36f, 1.0f)
-                        val r3 = oscillate(0.6f, 1.4f, 0.29f, 1.0f)
-
-                        val o4x = oscillate(0.3f, 0.7f, 0.44f, 1.0f)
-                        val o4y = oscillate(0.2f, 0.8f, 0.41f, 1.0f)
-                        val r4 = oscillate(0.9f, 1.7f, 0.47f, 1.0f)
-
-                        val o5x = oscillate(0.4f, 0.6f, 0.55f, 1.0f)
-                        val o5y = oscillate(0.0f, 1.0f, 0.51f, 1.0f)
-                        val r5 = oscillate(0.7f, 1.5f, 0.58f, 1.0f)
-
-                        val o6x = oscillate(0.0f, 1.0f, 0.66f, 1.0f)
-                        val o6y = oscillate(0.5f, 0.7f, 0.62f, 1.0f)
-                        val r6 = oscillate(0.8f, 1.8f, 0.69f, 1.0f)
-
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .drawWithCache {
-                                    val width = size.width
-                                    val height = size.height
-                                    val baseColor = Color(0xFF050505)
-
-                                    val brush1 = Brush.radialGradient(
-                                        colors = listOf(color1.copy(alpha = 0.85f), color1.copy(alpha = 0.5f), Color.Transparent),
-                                        center = Offset(width * o1x, height * o1y),
-                                        radius = width * r1
-                                    )
-                                    val brush2 = Brush.radialGradient(
-                                        colors = listOf(color2.copy(alpha = 0.8f), color2.copy(alpha = 0.45f), Color.Transparent),
-                                        center = Offset(width * o2x, height * o2y),
-                                        radius = width * r2
-                                    )
-                                    val brush3 = Brush.radialGradient(
-                                        colors = listOf(color3.copy(alpha = 0.75f), color3.copy(alpha = 0.4f), Color.Transparent),
-                                        center = Offset(width * o3x, height * o3y),
-                                        radius = width * r3
-                                    )
-                                    val brush4 = Brush.radialGradient(
-                                        colors = listOf(color4.copy(alpha = 0.7f), color4.copy(alpha = 0.35f), Color.Transparent),
-                                        center = Offset(width * o4x, height * o4y),
-                                        radius = width * r4
-                                    )
-                                    val brush5 = Brush.radialGradient(
-                                        colors = listOf(color5.copy(alpha = 0.65f), color5.copy(alpha = 0.3f), Color.Transparent),
-                                        center = Offset(width * o5x, height * o5y),
-                                        radius = width * r5
-                                    )
-                                    val brush6 = Brush.radialGradient(
-                                        colors = listOf(color6.copy(alpha = 0.6f), color6.copy(alpha = 0.25f), Color.Transparent),
-                                        center = Offset(width * o6x, height * o6y),
-                                        radius = width * r6
-                                    )
-
-                                    onDrawBehind {
-                                        drawRect(color = baseColor)
-                                        drawRect(brush = brush1)
-                                        drawRect(brush = brush2)
-                                        drawRect(brush = brush3)
-                                        drawRect(brush = brush4)
-                                        drawRect(brush = brush5)
-                                        drawRect(brush = brush6)
-                                    }
-                                }
-                        )
-                    }
-                }
-            }
-
             PlayerBackgroundStyle.APPLE_MUSIC -> {
                 AnimatedContent(
                     targetState = gradientColors,
@@ -2072,6 +1996,289 @@ fun PlayerBackground(
             }
 
             else -> {}
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun ColumnScope.PlayerControlsContent(
+    mediaMetadata: MediaMetadata,
+    playerDesignStyle: PlayerDesignStyle,
+    sliderStyle: SliderStyle,
+    playbackState: Int,
+    isPlaying: Boolean,
+    isLoading: Boolean,
+    repeatMode: Int,
+    canSkipPrevious: Boolean,
+    canSkipNext: Boolean,
+    textButtonColor: Color,
+    iconButtonColor: Color,
+    textBackgroundColor: Color,
+    icBackgroundColor: Color,
+    sliderPosition: Long?,
+    position: Long,
+    duration: Long,
+    playerConnection: PlayerConnection,
+    navController: NavController,
+    state: BottomSheetState,
+    menuState: MenuState,
+    bottomSheetPageState: BottomSheetPageState,
+    clipboardManager: ClipboardManager,
+    context: Context,
+    onSliderValueChange: (Long) -> Unit,
+    onSliderValueChangeFinished: () -> Unit,
+    currentFormat: FormatEntity?
+) {
+    val currentSong by playerConnection.currentSong.collectAsState(initial = null)
+    val currentSongLiked = currentSong?.song?.liked == true
+    var showDetailsDialog by rememberSaveable { mutableStateOf(false) }
+
+    if (showDetailsDialog) {
+        AlertDialog(
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+            onDismissRequest = { showDetailsDialog = false },
+            icon = {
+                Icon(
+                    painter = painterResource(R.drawable.info),
+                    contentDescription = null,
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { showDetailsDialog = false },
+                ) {
+                    Text(stringResource(android.R.string.ok))
+                }
+            },
+            text = {
+                Column(
+                    modifier = Modifier
+                        .sizeIn(minWidth = 280.dp, maxWidth = 560.dp)
+                        .verticalScroll(rememberScrollState()),
+                ) {
+                    listOf(
+                        stringResource(R.string.song_title) to mediaMetadata.title,
+                        stringResource(R.string.song_artists) to mediaMetadata.artists.joinToString { it.name },
+                        stringResource(R.string.media_id) to mediaMetadata.id,
+                        "Itag" to currentFormat?.itag?.toString(),
+                        stringResource(R.string.mime_type) to currentFormat?.mimeType,
+                        stringResource(R.string.codecs) to currentFormat?.codecs,
+                        stringResource(R.string.bitrate) to currentFormat?.bitrate?.let { "${it / 1000} Kbps" },
+                        stringResource(R.string.sample_rate) to currentFormat?.sampleRate?.let { "$it Hz" },
+                        stringResource(R.string.loudness) to currentFormat?.loudnessDb?.let { "$it dB" },
+                        stringResource(R.string.volume) to "${(playerConnection.player.volume * 100).toInt()}%",
+                    ).forEach { (label, text) ->
+                        val displayText = text ?: stringResource(R.string.unknown)
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.labelMedium,
+                        )
+                        Text(
+                            text = displayText,
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                onClick = {
+                                    clipboardManager.setPrimaryClip(ClipData.newPlainText(label, displayText))
+                                    Toast.makeText(context, R.string.copied, Toast.LENGTH_SHORT).show()
+                                },
+                            ),
+                        )
+                        Spacer(Modifier.height(8.dp))
+                    }
+                }
+            },
+        )
+    }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp)
+    ) {
+        Text(
+            text = mediaMetadata.title,
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold, fontSize = 24.sp),
+            color = textBackgroundColor,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.basicMarquee()
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = mediaMetadata.artists.joinToString { it.name },
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Normal),
+            color = textBackgroundColor.copy(alpha = 0.7f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.basicMarquee()
+        )
+    }
+
+    Spacer(Modifier.height(32.dp))
+
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
+    ) {
+        val sliderPos = sliderPosition ?: position
+        when (sliderStyle) {
+            SliderStyle.DEFAULT, SliderStyle.Standard -> {
+                Slider(
+                    value = sliderPos.toFloat(),
+                    valueRange = 0f..(if (duration == C.TIME_UNSET) 0f else duration.toFloat()).coerceAtLeast(0f),
+                    onValueChange = { onSliderValueChange(it.toLong()) },
+                    onValueChangeFinished = onSliderValueChangeFinished,
+                    colors = SliderDefaults.colors(
+                        activeTrackColor = textBackgroundColor,
+                        inactiveTrackColor = textBackgroundColor.copy(alpha = 0.3f),
+                        thumbColor = textBackgroundColor
+                    )
+                )
+            }
+            SliderStyle.SQUIGGLY, SliderStyle.Wavy, SliderStyle.Circular -> {
+                SquigglySlider(
+                    value = sliderPos.toFloat(),
+                    valueRange = 0f..(if (duration == C.TIME_UNSET) 0f else duration.toFloat()).coerceAtLeast(0f),
+                    onValueChange = { onSliderValueChange(it.toLong()) },
+                    onValueChangeFinished = onSliderValueChangeFinished,
+                    colors = SliderDefaults.colors(
+                        activeTrackColor = textBackgroundColor,
+                        inactiveTrackColor = textBackgroundColor.copy(alpha = 0.3f),
+                        thumbColor = textBackgroundColor
+                    ),
+                    squigglesSpec = SquigglySlider.SquigglesSpec(
+                        amplitude = if (isPlaying) (4.dp).coerceAtLeast(2.dp) else 0.dp,
+                        strokeWidth = 3.dp,
+                        wavelength = 36.dp,
+                    )
+                )
+            }
+            SliderStyle.SLIM, SliderStyle.Simple, SliderStyle.Thick -> {
+                Slider(
+                    value = sliderPos.toFloat(),
+                    valueRange = 0f..(if (duration == C.TIME_UNSET) 0f else duration.toFloat()).coerceAtLeast(0f),
+                    onValueChange = { onSliderValueChange(it.toLong()) },
+                    onValueChangeFinished = onSliderValueChangeFinished,
+                    thumb = { Spacer(modifier = Modifier.size(0.dp)) },
+                    colors = SliderDefaults.colors(
+                        activeTrackColor = textBackgroundColor,
+                        inactiveTrackColor = textBackgroundColor.copy(alpha = 0.3f)
+                    )
+                )
+            }
+        }
+
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
+        ) {
+            Text(
+                text = makeTimeString(sliderPos),
+                style = MaterialTheme.typography.labelMedium,
+                color = textBackgroundColor.copy(alpha = 0.7f)
+            )
+            Text(
+                text = if (duration != C.TIME_UNSET) makeTimeString(duration) else "",
+                style = MaterialTheme.typography.labelMedium,
+                color = textBackgroundColor.copy(alpha = 0.7f)
+            )
+        }
+    }
+
+    Spacer(Modifier.height(24.dp))
+
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(onClick = { playerConnection.toggleLike() }) {
+            Icon(
+                painter = painterResource(if (currentSongLiked) R.drawable.favorite else R.drawable.favorite_border),
+                contentDescription = null,
+                tint = if (currentSongLiked) MaterialTheme.colorScheme.error else textBackgroundColor
+            )
+        }
+
+        IconButton(
+            onClick = { playerConnection.seekToPrevious() },
+            enabled = canSkipPrevious
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.skip_previous),
+                contentDescription = null,
+                tint = textBackgroundColor,
+                modifier = Modifier.size(32.dp)
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .size(72.dp)
+                .clip(CircleShape)
+                .background(textButtonColor)
+                .clickable {
+                    if (playbackState == STATE_ENDED) {
+                        playerConnection.player.seekTo(0, 0)
+                        playerConnection.player.playWhenReady = true
+                    } else {
+                        playerConnection.player.togglePlayPause()
+                    }
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    color = iconButtonColor,
+                    modifier = Modifier.size(36.dp)
+                )
+            } else {
+                Icon(
+                    painter = painterResource(
+                        when {
+                            playbackState == STATE_ENDED -> R.drawable.replay
+                            isPlaying -> R.drawable.pause
+                            else -> R.drawable.play
+                        }
+                    ),
+                    contentDescription = null,
+                    tint = iconButtonColor,
+                    modifier = Modifier.size(36.dp)
+                )
+            }
+        }
+
+        IconButton(
+            onClick = { playerConnection.seekToNext() },
+            enabled = canSkipNext
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.skip_next),
+                contentDescription = null,
+                tint = textBackgroundColor,
+                modifier = Modifier.size(32.dp)
+            )
+        }
+
+        IconButton(
+            onClick = {
+                menuState.show {
+                    PlayerMenu(
+                        mediaMetadata = mediaMetadata,
+                        navController = navController,
+                        playerBottomSheetState = state,
+                        onShowDetailsDialog = { showDetailsDialog = true },
+                        onDismiss = menuState::dismiss
+                    )
+                }
+            }
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.more_vert),
+                contentDescription = null,
+                tint = textBackgroundColor
+            )
         }
     }
 }

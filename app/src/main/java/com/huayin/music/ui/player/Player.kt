@@ -3,8 +3,10 @@ package com.huayin.music.ui.player
 import android.content.Intent
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -18,17 +20,30 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.unit.Velocity
 import androidx.media3.common.Player
 import androidx.navigation.NavController
 import com.huayin.music.LocalPlayerConnection
 import com.huayin.music.R
+import com.huayin.music.constants.SmallButtonsShapeKey
+import com.huayin.music.constants.PlayPauseButtonShapeKey
+import com.huayin.music.constants.DefaultSmallButtonsShape
+import com.huayin.music.constants.DefaultPlayPauseButtonShape
 import com.huayin.music.extensions.togglePlayPause
 import com.huayin.music.extensions.toggleRepeatMode
 import com.huayin.music.ui.component.*
 import com.huayin.music.ui.menu.PlayerMenu
+import com.huayin.music.utils.getSmallButtonShape
+import com.huayin.music.utils.getPlayPauseShape
 import com.huayin.music.utils.makeTimeString
+import com.huayin.music.utils.rememberPreference
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlin.math.roundToInt
@@ -59,6 +74,12 @@ fun BottomSheetPlayer(
     val sleepTimerEnabled = playerConnection.service.sleepTimer.isActive
     var showSleepTimerDialog by remember { mutableStateOf(false) }
     var sleepTimerValue by remember { mutableFloatStateOf(30f) }
+
+    val smallButtonsShapeState by rememberPreference(SmallButtonsShapeKey, DefaultSmallButtonsShape)
+    val playPauseShapeState by rememberPreference(PlayPauseButtonShapeKey, DefaultPlayPauseButtonShape)
+    
+    val smallButtonsShape = remember(smallButtonsShapeState) { getSmallButtonShape(smallButtonsShapeState).toShape() }
+    val playPauseShape = remember(playPauseShapeState) { getPlayPauseShape(playPauseShapeState).toShape() }
 
     LaunchedEffect(playbackState) {
         if (playbackState == Player.STATE_READY) {
@@ -113,11 +134,60 @@ fun BottomSheetPlayer(
             },
             collapsedContent = { MiniPlayer(position = position, duration = duration) },
         ) {
+            val nestedScrollConnection = remember {
+                object : NestedScrollConnection {
+                    override fun onPreScroll(
+                        available: Offset,
+                        source: NestedScrollSource,
+                    ): Offset {
+                        if (queueBottomSheetState.isExpanded && available.y > 0) {
+                            queueBottomSheetState.dispatchRawDelta(available.y)
+                            return available
+                        }
+                        if (available.y < 0 && state.expandedBound != state.value) {
+                            return Offset.Zero
+                        }
+                        return queueBottomSheetState.preUpPostDownNestedScrollConnection.onPreScroll(
+                            available,
+                            source
+                        )
+                    }
+
+                    override fun onPostScroll(
+                        consumed: Offset,
+                        available: Offset,
+                        source: NestedScrollSource,
+                    ): Offset {
+                        return queueBottomSheetState.preUpPostDownNestedScrollConnection.onPostScroll(
+                            consumed,
+                            available,
+                            source
+                        )
+                    }
+
+                    override suspend fun onPreFling(available: Velocity): Velocity {
+                        return queueBottomSheetState.preUpPostDownNestedScrollConnection.onPreFling(
+                            available
+                        )
+                    }
+
+                    override suspend fun onPostFling(
+                        consumed: Velocity,
+                        available: Velocity,
+                    ): Velocity {
+                        return queueBottomSheetState.preUpPostDownNestedScrollConnection.onPostFling(
+                            consumed,
+                            available
+                        )
+                    }
+                }
+            }
+
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .fillMaxSize()
-                    .nestedScroll(queueBottomSheetState.preUpPostDownNestedScrollConnection)
+                    .nestedScroll(nestedScrollConnection)
                     .verticalScroll(rememberScrollState())
                     .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Vertical))
             ) {
@@ -251,15 +321,15 @@ fun BottomSheetPlayer(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    ControlIcon(R.drawable.shuffle, isShuffleEnabled) { playerConnection.toggleShuffle() }
+                    ControlIcon(R.drawable.shuffle, isShuffleEnabled, shape = smallButtonsShape) { playerConnection.toggleShuffle() }
                     
-                    ControlIcon(R.drawable.skip_previous, size = 52.dp) { playerConnection.seekToPrevious() }
+                    ControlIcon(R.drawable.skip_previous, size = 52.dp, shape = smallButtonsShape) { playerConnection.seekToPrevious() }
 
-                    // Play/Pause (Large Square)
+                    // Play/Pause (Large Shape)
                     Surface(
                         onClick = { playerConnection.player.togglePlayPause() },
                         modifier = Modifier.size(80.dp),
-                        shape = RoundedCornerShape(32.dp),
+                        shape = playPauseShape,
                         color = MaterialTheme.colorScheme.onSurface
                     ) {
                         Box(contentAlignment = Alignment.Center) {
@@ -272,14 +342,15 @@ fun BottomSheetPlayer(
                         }
                     }
 
-                    ControlIcon(R.drawable.skip_next, size = 52.dp) { playerConnection.seekToNext() }
+                    ControlIcon(R.drawable.skip_next, size = 52.dp, shape = smallButtonsShape) { playerConnection.seekToNext() }
 
                     ControlIcon(
                         icon = when (repeatMode) {
                             Player.REPEAT_MODE_ONE -> R.drawable.repeat_one
                             else -> R.drawable.repeat
                         },
-                        active = repeatMode != Player.REPEAT_MODE_OFF
+                        active = repeatMode != Player.REPEAT_MODE_OFF,
+                        shape = smallButtonsShape
                     ) { playerConnection.player.toggleRepeatMode() }
                 }
 
@@ -353,11 +424,11 @@ fun SmallCircularAction(icon: Int, tint: Color? = null, onClick: () -> Unit) {
 }
 
 @Composable
-fun ControlIcon(icon: Int, active: Boolean = false, size: Dp = 46.dp, onClick: () -> Unit) {
+fun ControlIcon(icon: Int, active: Boolean = false, size: Dp = 46.dp, shape: androidx.compose.ui.graphics.Shape = CircleShape, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
         modifier = Modifier.size(size),
-        shape = RoundedCornerShape(14.dp),
+        shape = shape,
         color = if (active) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
     ) {
         Box(contentAlignment = Alignment.Center) {

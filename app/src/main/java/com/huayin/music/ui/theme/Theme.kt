@@ -181,9 +181,14 @@ object PlayerSliderColors {
     ) = SliderDefaults.colors(
         activeTrackColor = when (playerBackground) {
             PlayerBackgroundStyle.DEFAULT -> textButtonColor
-            PlayerBackgroundStyle.BLUR -> Color.White
-            PlayerBackgroundStyle.GRADIENT -> Color.White
-            PlayerBackgroundStyle.APPLE_MUSIC -> Color.White
+            PlayerBackgroundStyle.BLUR,
+            PlayerBackgroundStyle.GRADIENT,
+            PlayerBackgroundStyle.APPLE_MUSIC,
+            PlayerBackgroundStyle.COLORING,
+            PlayerBackgroundStyle.BLUR_GRADIENT,
+            PlayerBackgroundStyle.CUSTOM,
+            PlayerBackgroundStyle.GLOW,
+            PlayerBackgroundStyle.GLOW_ANIMATED -> Color.White
         },
         inactiveTrackColor = when {
             useDarkTheme -> Color.Gray.copy(alpha = 0.5f)
@@ -191,16 +196,26 @@ object PlayerSliderColors {
         },
         activeTickColor = when (playerBackground) {
             PlayerBackgroundStyle.DEFAULT -> textButtonColor
-            PlayerBackgroundStyle.BLUR -> Color.White
-            PlayerBackgroundStyle.GRADIENT -> Color.White
-            PlayerBackgroundStyle.APPLE_MUSIC -> Color.White
+            PlayerBackgroundStyle.BLUR,
+            PlayerBackgroundStyle.GRADIENT,
+            PlayerBackgroundStyle.APPLE_MUSIC,
+            PlayerBackgroundStyle.COLORING,
+            PlayerBackgroundStyle.BLUR_GRADIENT,
+            PlayerBackgroundStyle.CUSTOM,
+            PlayerBackgroundStyle.GLOW,
+            PlayerBackgroundStyle.GLOW_ANIMATED -> Color.White
         },
         inactiveTickColor = Color.Gray,
         thumbColor = when (playerBackground) {
             PlayerBackgroundStyle.DEFAULT -> textButtonColor
-            PlayerBackgroundStyle.BLUR -> Color.White
-            PlayerBackgroundStyle.GRADIENT -> Color.White
-            PlayerBackgroundStyle.APPLE_MUSIC -> Color.White
+            PlayerBackgroundStyle.BLUR,
+            PlayerBackgroundStyle.GRADIENT,
+            PlayerBackgroundStyle.APPLE_MUSIC,
+            PlayerBackgroundStyle.COLORING,
+            PlayerBackgroundStyle.BLUR_GRADIENT,
+            PlayerBackgroundStyle.CUSTOM,
+            PlayerBackgroundStyle.GLOW,
+            PlayerBackgroundStyle.GLOW_ANIMATED -> Color.White
         }
     )
 }
